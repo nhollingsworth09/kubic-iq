@@ -8,21 +8,18 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   margin: 1rem;
   max-width: calc(100vw - 2rem);
+  position: relative; /* Ensure proper positioning context */
 }
 
-/* Left side - Graphic panel with background image */
+/* Left side - Graphic panel */
 .graphicPanel {
   position: relative;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 2rem;  background: 
-    linear-gradient(135deg, rgba(107, 70, 193, 0.85) 0%, rgba(42, 175, 225, 0.85) 100%),
-    url('/images/login-background.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, rgba(107, 70, 193, 1) 0%, rgba(42, 175, 225, 1) 100%);
   color: white;
   overflow: hidden;
 }
@@ -74,26 +71,7 @@
 .brandContent p {
   font-size: 1.2rem;
   opacity: 0.95;
-  line-height: 1.6;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-/* Cloud transition effect */
-.cloudTransition {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 100px;
-  height: 120px;
-  color: #fff;
-  z-index: 1;
-}
-
-.waveSvg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(90deg);
-  opacity: 0.6;
+  line-height: 1.6;  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Right side - Form panel */
@@ -293,16 +271,21 @@
   .logo {
     width: 150px;
   }
-
   .cloudTransition {
+    position: absolute;
     bottom: -1px;
     right: 0;
     width: 100%;
     height: 60px;
+    display: flex;
+    align-items: center;
   }
 
   .waveSvg {
+    width: 100%;
+    height: auto;
     transform: rotate(0deg);
+    opacity: 0.9;
   }
 
   .formPanel {
@@ -319,10 +302,9 @@
   }
 }
 
-@media (max-width: 480px) {
-  .graphicPanel {
+@media (max-width: 480px) {  .graphicPanel {
     min-height: 35vh;
-    padding: 1.5rem 1rem 2rem;
+    padding: 1.5rem 1rem;
   }
 
   .brandContent h1 {
