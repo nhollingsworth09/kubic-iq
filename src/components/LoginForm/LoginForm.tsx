@@ -1,24 +1,24 @@
 import { useState, FormEvent } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './LoginForm.module.css';
 
-interface LoginFormProps {
-  onSubmit: (email: string, password: string) => void;
-  isLoading?: boolean;
-}
-
-export const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
+export const LoginForm = () => {
+  const { login, isLoading, error } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    onSubmit(email, password);
+    try {
+      await login(email, password);
+    } catch (err) {
+      // Error is handled by AuthContext
+    }
   };
 
   return (
     <div className={styles.loginContainer}>
       <div className={styles.media}>
-        {/* TODO: Add brand image from branding assets */}
         <img src="/brand/logo.svg" alt="Kubic IQ Logo" className={styles.logo} />
       </div>
       
@@ -28,6 +28,10 @@ export const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
         <p className={styles.info}>
           Sign in to access your personalized SAT prep experience
         </p>
+
+        {error && (
+          <div className={styles.error}>{error}</div>
+        )}
 
         <div className={styles.inputGroup}>
           <input

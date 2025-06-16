@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import clsx from 'clsx';
+import { Loading } from '../Loading/Loading';
 import styles from './Question.module.css';
 
 interface Option {
@@ -6,61 +8,68 @@ interface Option {
   text: string;
 }
 
-interface QuestionProps {
+interface QuestionData {
   id: string;
   text: string;
   options: Option[];
-  onAnswer: (questionId: string, answerId: string) => void;
-  isSubmitting?: boolean;
+  correctAnswer: string;
+  explanation: string;
+  difficulty: number;
+}
+
+interface QuestionProps {
+  question: QuestionData;
+  onAnswer: (answerId: string) => void;
+  isLoading?: boolean;
 }
 
 export const Question = ({ 
-  id, 
-  text, 
-  options, 
-  onAnswer, 
-  isSubmitting = false 
+  question,
+  onAnswer,
+  isLoading = false
 }: QuestionProps) => {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [showExplanation, setShowExplanation] = useState(false);
 
-  const handleSubmit = () => {
-    if (selectedOption && !isSubmitting) {
-      onAnswer(id, selectedOption);
-    }
+  const handleOptionClick = (optionId: string) => {
+    if (selectedAnswer || isLoading) return;
+    
+    setSelectedAnswer(optionId);
+    setShowExplanation(true);
+    onAnswer(optionId);
   };
+
+  if (isLoading) {
+    return <div data-testid="loading-indicator"><Loading /></div>;
+  }
 
   return (
     <div className={styles.question}>
       <div className={styles.questionText}>
-        <h2 className={styles.questionNumber}>Question {id}</h2>
-        <p className={styles.text}>{text}</p>
+        <p>{question.text}</p>
       </div>
 
       <div className={styles.options}>
-        {options.map((option) => (
+        {question.options.map((option) => (
           <button
             key={option.id}
-            className={`${styles.option} ${
-              selectedOption === option.id ? styles.selected : ''
-            }`}
-            onClick={() => setSelectedOption(option.id)}
-            disabled={isSubmitting}
+            onClick={() => handleOptionClick(option.id)}
+            disabled={!!selectedAnswer}
+            className={clsx(styles.option, {
+              [styles.selected]: selectedAnswer === option.id,
+              [styles.correct]: selectedAnswer && option.id === question.correctAnswer
+            })}
           >
-            <span className={styles.optionLabel}>{option.id}.</span>
-            <span className={styles.optionText}>{option.text}</span>
+            {option.text}
           </button>
         ))}
       </div>
 
-      <div className={styles.actions}>
-        <button
-          className={styles.submitButton}
-          onClick={handleSubmit}
-          disabled={!selectedOption || isSubmitting}
-        >
-          {isSubmitting ? 'Submitting...' : 'Submit Answer'}
-        </button>
-      </div>
+      {showExplanation && (
+        <div className={styles.explanation}>
+          <p>{question.explanation}</p>
+        </div>
+      )}
     </div>
   );
 };

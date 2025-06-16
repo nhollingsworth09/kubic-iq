@@ -1,45 +1,20 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useState } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginForm } from './components/LoginForm/LoginForm';
 import { Dashboard } from './components/Dashboard/Dashboard';
+import { Loading } from './components/Loading/Loading';
+import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
+import './styles/global.css';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  masteryScore: number;
-}
+const AppRoutes = () => {
+  const { user, isLoading } = useAuth();
 
-export const App = () => {
-  const [user, setUser] = useState<User | null>(null);
-
-  const handleLogin = async (email: string, password: string) => {
-    try {
-      // TODO: Implement actual login API call
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-
-      const userData = await response.json();
-      setUser(userData);
-    } catch (error) {
-      console.error('Login error:', error);
-      // TODO: Show error message to user
-    }
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-  };
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
-    <Router>
+    <ErrorBoundary>
       <Routes>
         <Route 
           path="/login" 
@@ -47,7 +22,7 @@ export const App = () => {
             user ? (
               <Navigate to="/dashboard" replace />
             ) : (
-              <LoginForm onSubmit={handleLogin} />
+              <LoginForm />
             )
           } 
         />
@@ -55,7 +30,7 @@ export const App = () => {
           path="/dashboard" 
           element={
             user ? (
-              <Dashboard user={user} onLogout={handleLogout} />
+              <Dashboard />
             ) : (
               <Navigate to="/login" replace />
             )
@@ -63,9 +38,19 @@ export const App = () => {
         />
         <Route 
           path="/" 
-          element={<Navigate to="/login" replace />} 
+          element={<Navigate to={user ? "/dashboard" : "/login"} replace />} 
         />
       </Routes>
-    </Router>
+    </ErrorBoundary>
+  );
+};
+
+export const App = () => {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>  
   );
 };
