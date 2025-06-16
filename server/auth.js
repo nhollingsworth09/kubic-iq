@@ -25,18 +25,29 @@ const User = sequelize.define('User', {
   displayName: {
     type: DataTypes.STRING,
     allowNull: false
-  },
-  trueskill_mu: {
+  },  trueskill_mu: {
     type: DataTypes.FLOAT,
-    defaultValue: 25.0 // Default TrueSkill mean
+    defaultValue: 5.0, // Default TrueSkill mean (scaled to 0-10)
+    validate: {
+      min: 0,
+      max: 10
+    }
   },
   trueskill_sigma: {
     type: DataTypes.FLOAT,
-    defaultValue: 8.333 // Default TrueSkill standard deviation
+    defaultValue: 1.67, // Default TrueSkill standard deviation (scaled)
+    validate: {
+      min: 0,
+      max: 3.33 // Maximum allowed sigma
+    }
   },
   masteryScore: {
     type: DataTypes.FLOAT,
-    defaultValue: 0
+    defaultValue: 5.0, // Start at middle of 0-10 range
+    validate: {
+      min: 0,
+      max: 10
+    }
   },
   isAdmin: {
     type: DataTypes.BOOLEAN,

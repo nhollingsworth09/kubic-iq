@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { sequelize, signup, login, getMe, authMiddleware } = require('./auth');
 const questionsRouter = require('./questions');
+const answerRouter = require('./answer');
 
 const app = express();
 
@@ -17,6 +18,9 @@ app.get('/api/auth/me', authMiddleware, getMe);
 
 // Questions routes
 app.use('/api/admin/questions', questionsRouter);
+
+// Answer routes
+app.use('/api/answer', answerRouter);
 
 // Create database tables and start server
 const PORT = process.env.PORT || 3001;

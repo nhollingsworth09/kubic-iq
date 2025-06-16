@@ -30,16 +30,23 @@ module.exports = (sequelize) => sequelize.define('Question', {
     validate: {
       min: 0
     }
-  },
-  mu: {
+  },  mu: {
     type: DataTypes.FLOAT,
     allowNull: false,
-    defaultValue: 25.0 // Default TrueSkill mean
+    defaultValue: 5.0, // Default TrueSkill mean (scaled to 0-10)
+    validate: {
+      min: 0,
+      max: 10
+    }
   },
   sigma: {
     type: DataTypes.FLOAT,
     allowNull: false,
-    defaultValue: 8.333 // Default TrueSkill standard deviation
+    defaultValue: 1.67, // Default TrueSkill standard deviation (scaled)
+    validate: {
+      min: 0,
+      max: 3.33 // Maximum allowed sigma
+    }
   },
   tags: {
     type: DataTypes.JSON,

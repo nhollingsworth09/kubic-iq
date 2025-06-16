@@ -7,8 +7,20 @@ const sequelize = new Sequelize({
 });
 
 const Question = require('./question')(sequelize);
+const UserQuestionHistory = require('./userQuestionHistory')(sequelize);
+
+// Define associations
+Question.hasMany(UserQuestionHistory, {
+  foreignKey: 'questionId',
+  onDelete: 'CASCADE'
+});
+
+UserQuestionHistory.belongsTo(Question, {
+  foreignKey: 'questionId'
+});
 
 module.exports = {
   sequelize,
-  Question
+  Question,
+  UserQuestionHistory
 };
