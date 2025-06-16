@@ -17,11 +17,10 @@ router.get('/progress', authMiddleware, async (req, res) => {
         message: 'User not found'
       });
     }
-    
-    res.json({
+      res.json({
       success: true,
       responseCount: user.responseCount || 0,
-      masteryScore: user.masteryScore,
+      masteryScore: user.responseCount >= MIN_ANSWERS ? user.masteryScore : null,
       requiredAnswers: MIN_ANSWERS
     });
   } catch (error) {

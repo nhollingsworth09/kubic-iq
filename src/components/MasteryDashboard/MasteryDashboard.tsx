@@ -11,17 +11,18 @@ const MIN_ANSWERS = 25;
 interface UserProgress {
   responseCount: number;
   masteryScore: number | null;
+  requiredAnswers?: number;
 }
 
 export const MasteryDashboard = () => {
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [activeTab, setActiveTab] = useState<'practice' | 'learn'>('practice');
   
   useEffect(() => {
     // Fetch user progress from backend
     const fetchUserProgress = async () => {
       try {
-        // Replace with your actual API endpoint
         const response = await fetch('/api/user/progress', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -44,106 +45,170 @@ export const MasteryDashboard = () => {
     fetchUserProgress();
   }, []);
 
-  const practiceOptions = [
-    'Build a Custom Quiz',
-    'Build a Custom Exam',
-    'Take a Mock Exam'
+  const resources = [
+    { title: 'View Formula Sheet', icon: 'formula'},
+    { title: 'Guide to Written-Answer Questions', icon: 'guide'},
+    { title: 'Knowing You\'re Ready', icon: 'ready'}
   ];
 
-  const resources = [
-    { title: 'View Formula Sheet', icon: 'formula' as const },
-    { title: 'Guide to Written-Answer Questions', icon: 'guide' as const },
-    { title: 'Knowing You\'re Ready', icon: 'ready' as const }
+  const practiceOptions = [
+    { title: 'Build a Custom Quiz', icon: 'pen' },
+    { title: 'Build a Custom Exam', icon: 'pen' },
+    { title: 'Take a Mock Exam', icon: 'pen'}
   ];
+
+  const isMasteryUnlocked = userProgress && userProgress.responseCount >= MIN_ANSWERS;
+  const remainingQuestions = MIN_ANSWERS - (userProgress?.responseCount || 0);
 
   return (
     <div className={styles.dashboardContainer}>
       <div className={styles.dashboardCard}>
         {/* Header Section */}
-        <div className={styles.dashboardHeader}>
-          <div className={styles.headerTop}>
-            <div className={styles.titleIcon}>
-              <svg className={styles.headerIcon} viewBox="0 0 24 24" fill="currentColor">
+        <header className={styles.dashboardHeader}>
+          <div className={styles.headerLeft}>
+            <svg className={styles.headerIcon} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+            </svg>
+            <h1>Practice</h1>
+          </div>
+          
+          <div className={styles.headerTabs}>
+            <button 
+              className={`${styles.tab} ${activeTab === 'practice' ? styles.tabActive : ''}`}
+              onClick={() => setActiveTab('practice')}
+              aria-label="Practice tab"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
               </svg>
-              Practice Mastery
-            </div>              <div className={styles.masteryLabel}>
-              Mastery Score <Badge locked={!userProgress || userProgress.responseCount < MIN_ANSWERS} />
-            </div>
+            </button>
+            <button 
+              className={`${styles.tab} ${activeTab === 'learn' ? styles.tabActive : ''}`}
+              onClick={() => setActiveTab('learn')}
+              aria-label="Learn tab"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+              </svg>
+            </button>
           </div>
-          <TabIcons />
-        </div>
+          
+          <div className={styles.headerRight}>
+            <span>Mastery Score</span>
+            <Badge locked={!isMasteryUnlocked} />
+          </div>
+        </header>
 
-        {/* Main Content */}
-        <div className={styles.dashboardMain}>
-          {/* Left Panel */}
-          <div className={styles.leftPanel}>            <div className={styles.introBox}>
-              {loading ? (
-                <h2>Loading your progress...</h2>
-              ) : !userProgress || userProgress.responseCount < MIN_ANSWERS ? (
-                <>
-                  <h2>Answer {MIN_ANSWERS - (userProgress?.responseCount || 0)} more questions to unlock your Mastery Score</h2>
-                  <p>
-                    To get started, take a practice quiz or exam. Based on your performance, 
-                    we'll show you a personalized mastery score and track your progress.
-                  </p>
-                  {userProgress && (
-                    <div className={styles.progressWrapper}>
-                      <progress value={userProgress.responseCount} max={MIN_ANSWERS} className={styles.progressBar}></progress>
-                      <p className={styles.progressText}>{userProgress.responseCount}/{MIN_ANSWERS} questions answered</p>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <h2>Your Mastery Score: {userProgress.masteryScore?.toFixed(1)}</h2>
-                  <p>
-                    Continue practicing to improve your mastery score. We'll adjust your 
-                    score based on the difficulty of questions you answer correctly.
-                  </p>
-                </>
-              )}
-              <button className={styles.primaryInput}>
-                <svg className={styles.searchIcon} viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        {/* Main Content - Stacked layout to match design */}
+        <section className={styles.dashboardMainStacked}>
+          {/* Intro Box */}
+          <div className={styles.introBox}>
+            {loading ? (
+              <h2>Loading your progress...</h2>
+            ) : !isMasteryUnlocked ? (
+              <>
+                <h2>Answer {remainingQuestions} more questions to unlock your Mastery Score</h2>
+                <p>
+                  To get started, you'll need to answer {MIN_ANSWERS} questions. This is the first step towards
+                  getting you ready for your exam, and will allow us to accurately set your Mastery Score.
+                  <a href="#" className={styles.infoLink}> What is Mastery Score?</a>
+                </p>
+                {userProgress && (
+                  <div className={styles.progressWrapper}>
+                    <progress 
+                      value={userProgress.responseCount} 
+                      max={MIN_ANSWERS} 
+                      className={styles.progressBar}
+                    />
+                    <p className={styles.progressText}>
+                      {userProgress.responseCount}/{MIN_ANSWERS} questions answered
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <h2>Your Mastery Score: {userProgress?.masteryScore?.toFixed(1)}</h2>
+                <p>
+                  Continue practicing to improve your mastery score. We'll adjust your 
+                  score based on the difficulty of questions you answer correctly.
+                </p>
+              </>
+            )}
+            <button className={styles.btnPrimary}>
+              <svg className={styles.buttonIcon} viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg>
+              <span style={{marginLeft: "0.5rem"}}>Take a Quiz</span>
+            </button>
+          </div>
+
+          {/* Score Box */}
+          <div className={styles.scoreBox}>
+            <h3>
+              <svg className={styles.iconLarge} viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11 2v20c-5.07-.5-9-4.79-9-10s3.93-9.5 9-10zm2.03 0v8.99H22c-.47-4.74-4.24-8.52-8.97-8.99zm0 11.01V22c4.74-.47 8.5-4.25 8.97-8.99h-8.97z"/>
+              </svg>
+              Mastery Score
+            </h3>
+            
+            <div className={styles.hexagonLarge}>
+              {!isMasteryUnlocked ? (
+                <svg className={styles.iconLarge} viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
                 </svg>
-                Build a Custom Quiz
-              </button>
+              ) : (
+                <span className={styles.scoreDisplay}>
+                  {userProgress?.masteryScore?.toFixed(1)}
+                </span>
+              )}
             </div>
+            
+            <p>
+              <strong>{userProgress?.responseCount || 0}/{MIN_ANSWERS}</strong><br />
+              {!isMasteryUnlocked ? 'Unlock Mastery Score by Answering 25 Questions' : 'Mastery Score Unlocked'}
+            </p>
+          </div>
 
-            <div className={styles.morePractice}>
+          {/* Practice and Resources Row */}
+          <div className={styles.practiceResourcesRow}>
+            {/* Practice Options */}
+            <div className={styles.practiceOptions}>
               <h3>More Ways to Practice</h3>
-              <div className={styles.practiceOptions}>
+              <div className={styles.buttonGroup}>
                 {practiceOptions.map((option, index) => (
-                  <button key={index} className={styles.practiceButton}>
-                    {option}
+                  <button key={index} className={styles.btnOutline}>
+                    <svg className={styles.buttonIcon} viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                    {option.title}
+                    <svg className={styles.infoIcon} viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/>
+                    </svg>
                   </button>
                 ))}
               </div>
             </div>
-          </div>          {/* Right Panel */}
-          <div className={styles.rightPanel}>
-            <HexagonScore 
-              score={userProgress?.responseCount || 0} 
-              maxScore={MIN_ANSWERS} 
-              locked={!userProgress || userProgress.responseCount < MIN_ANSWERS} 
-            />
             
-            <div className={styles.resourceLinks}>
+            {/* Resources */}
+            <div className={styles.resources}>
               <h3>Additional Resources</h3>
-              <div className={styles.resourceCards}>
+              <div className={styles.buttonGroup}>
                 {resources.map((resource, index) => (
-                  <ResourceCard
-                    key={index}
-                    title={resource.title}
-                    icon={resource.icon}
-                    onClick={() => console.log(`Clicked: ${resource.title}`)}
-                  />
+                  <button key={index} className={styles.btnResource}>
+                    <svg className={styles.buttonIcon} viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                    </svg>
+                    {resource.title}
+                    <svg className={styles.buttonIcon} viewBox="0 0 24 24" fill="currentColor">
+                      <path d=""/>
+                    </svg>
+                  </button>
                 ))}
               </div>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

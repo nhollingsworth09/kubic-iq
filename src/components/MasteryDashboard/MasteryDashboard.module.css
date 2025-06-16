@@ -1,180 +1,267 @@
-/* Dashboard Container */
-.dashboardContainer {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  background-color: #f8fafc;
-  min-height: calc(100vh - 120px); /* Account for header */
+/* Variables */
+:root {
+  --font-primary: 'Montserrat', sans-serif;
+  --color-primary-navy: #324262;
+  --color-accent-blue: #26B1E2;
+  --color-bg-light: #f5f7fa;
+  --color-muted: #718096;
+  --color-white: #ffffff;
+  --color-border: #e2e8f0;
+  --color-shadow: rgba(0, 0, 0, 0.05);
+  --color-success: #4caf50;
+  --color-error: #f44336;
 }
 
-.dashboardCard {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+/* Dashboard Container */
+.dashboardContainer {
+  display: flex;
   width: 100%;
+  min-height: calc(100vh - 120px);
+  background-color: var(--color-bg-light);
+  padding: 2rem 1rem;
+}
+
+/* Dashboard Card */
+.dashboardCard {
+  flex-grow: 1;
+  max-width: 800px;
+  margin: 1rem auto;
+  background: var(--color-white);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px var(--color-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Header Section */
 .dashboardHeader {
-  background-color: #324262;
-  color: white;
-  padding: 1.5rem 2rem;
-}
-
-.headerTop {
-  display: flex;
-  justify-content: space-between;
+  background: var(--color-primary-navy);
+  color: var(--color-white);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  margin-bottom: 1rem;
+  padding: 1rem 1.5rem;
 }
 
-.titleIcon {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.headerIcon {
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
-.masteryLabel {
+.headerLeft {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1rem;
+  justify-self: start;
 }
 
-/* Main Content */
-.dashboardMain {
+.headerLeft h1 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.headerTabs {
   display: flex;
-  gap: 2rem;
-  padding: 2rem;
-  align-items: flex-start;
+  gap: 0.5rem;
+  justify-self: center;
 }
 
-/* Left Panel */
-.leftPanel {
-  flex: 1;
-  max-width: 65%;
-  min-width: 0; /* Prevent flex items from overflowing */
+.tab {
+  background: var(--color-accent-blue);
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
 }
 
+.tabActive {
+  background: var(--color-white);
+}
+
+.tab svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-primary-navy);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-self: end;
+}
+
+/* Main Content Stacked */
+.dashboardMainStacked {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+/* Intro Box */
 .introBox {
-  background-color: #f8fafc;
-  padding: 2rem;
+  background: var(--color-bg-light);
   border-radius: 12px;
-  margin-bottom: 2rem;
-  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .introBox h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 1rem 0;
-  line-height: 1.3;
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
 }
 
 .introBox p {
-  color: #64748b;
-  font-size: 1rem;
-  line-height: 1.6;
-  margin: 0 0 1.5rem 0;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  margin-bottom: 1rem;
 }
 
-.primaryInput {
-  width: 100%;
+.infoLink {
+  color: var(--color-accent-blue);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+/* Score Box */
+.scoreBox {
+  background: var(--color-bg-light);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.scoreBox h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  text-align: center;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  background-color: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #374151;
-  cursor: pointer;
-  transition: all 0.2s;
+  gap: 0.5rem;
 }
 
-.primaryInput:hover {
-  border-color: #2AAFE1;
-  background-color: #f8fafc;
+.scoreBox p {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  text-align: center;
 }
 
-.searchIcon {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: #9ca3af;
+/* Practice and Resources */
+.practiceResourcesRow {
+  display: flex;
+  gap: 1.5rem;
 }
 
-.morePractice {
-  margin-top: 2rem;
+.practiceOptions,
+.resources {
+  flex: 1;
+  background: var(--color-bg-light);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
-.morePractice h3 {
+.practiceOptions h3,
+.resources h3 {
   font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 1rem 0;
+  margin-bottom: 1.25rem;
+  color: var(--color-primary-navy);
+  text-align: center;
 }
 
-.practiceOptions {
+.buttonGroup {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.practiceButton {
-  padding: 1rem 1.5rem;
-  background-color: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  text-align: left;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #374151;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.practiceButton:hover {
-  background-color: #e2e8f0;
-  border-color: #cbd5e1;
-}
-
-/* Right Panel */
-.rightPanel {
-  flex: 0 1 35%;
+.btnOutline,
+.btnResource {
   display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  min-width: 0; /* Prevent flex items from overflowing */
-}
-
-.resourceLinks h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 1rem 0;
-}
-
-.resourceCards {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-/* Progress Bar Styles */
-.progressWrapper {
-  margin-top: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: var(--color-primary-navy);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.infoIcon {
+  color: var(--color-muted);
+  width: 1rem;
+  height: 1rem;
+}
+
+.btnOutline:hover,
+.btnResource:hover {
+  background: #eef3f7;
+}
+
+/* Buttons */
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-accent-blue);
+  color: var(--color-white);
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.btnPrimary:hover {
+  background: #1a9ccc;
+}
+
+/* Hexagon */
+.hexagon,
+.hexagonLarge {
+  background: var(--color-accent-blue);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hexagon {
+  width: 2rem;
+  height: 2rem;
+  clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%);
+}
+
+.hexagonLarge {
+  width: 5rem;
+  height: 5rem;
+  margin: 0 auto 1rem;
+  clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%);
+}
+
+.scoreDisplay {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Progress bar */
+.progressWrapper {
+  width: 100%;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .progressBar {
@@ -187,86 +274,68 @@
 }
 
 .progressBar::-webkit-progress-bar {
-  background-color: #e2e8f0;
+  background-color: var(--color-border);
 }
 
 .progressBar::-webkit-progress-value {
-  background: linear-gradient(90deg, #6b46c1 0%, #3498db 100%);
+  background: linear-gradient(90deg, var(--color-primary-navy) 0%, var(--color-accent-blue) 100%);
 }
 
 .progressBar::-moz-progress-bar {
-  background: linear-gradient(90deg, #6b46c1 0%, #3498db 100%);
+  background: linear-gradient(90deg, var(--color-primary-navy) 0%, var(--color-accent-blue) 100%);
 }
 
 .progressText {
   margin-top: 0.5rem;
-  color: #4a5568;
+  color: var(--color-muted);
   font-size: 0.875rem;
   text-align: center;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .dashboardContainer {
-    padding: 1.5rem 1rem;
+/* Icons */
+.headerIcon,
+.buttonIcon {
+  width: 1rem;
+  height: 1rem;
+  display: inline-block;
+}
+
+.iconLarge {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .practiceResourcesRow {
+    flex-direction: column;
   }
   
-  .dashboardMain {
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .leftPanel {
-    max-width: 100%;
-  }
-
-  .rightPanel {
-    flex: none;
-    max-width: 100%;
+  .dashboardMainStacked {
+    padding: 1rem;
   }
 }
 
 @media (max-width: 768px) {
   .dashboardContainer {
-    margin: 0;
     padding: 1rem 0.5rem;
-    min-height: calc(100vh - 100px);
   }
-
+  
   .dashboardHeader {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(3, auto);
+    gap: 0.75rem;
     padding: 1rem;
   }
-
-  .headerTop {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
+  
+  .headerLeft,
+  .headerTabs,
+  .headerRight {
+    justify-self: center;
   }
-
-  .titleIcon {
-    font-size: 1.25rem;
-  }
-
-  .dashboardMain {
-    padding: 1rem;
-    gap: 1.5rem;
-  }
-
-  .introBox {
-    padding: 1.5rem;
-  }
-
+  
   .introBox h2 {
-    font-size: 1.25rem;
-  }
-
-  .practiceOptions {
-    gap: 0.5rem;
-  }
-
-  .practiceButton {
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
+    font-size: 1.2rem;
   }
 }
 
@@ -275,25 +344,21 @@
     padding: 0.5rem 0.25rem;
   }
   
-  .dashboardHeader {
-    padding: 0.75rem;
-  }
-
-  .dashboardMain {
+  .dashboardMainStacked {
     padding: 0.75rem;
     gap: 1rem;
   }
-
+  
   .introBox {
     padding: 1rem;
-  }
-
-  .primaryInput {
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
   }
   
   .introBox h2 {
     font-size: 1.125rem;
+  }
+  
+  .btnPrimary {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
   }
 }

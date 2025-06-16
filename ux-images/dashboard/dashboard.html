@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Practice Dashboard</title>
+  <link rel="stylesheet" href="mastery-dashboard.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="dashboard__container">
+    <aside class="sidebar">
+      <div class="sidebar__logo">
+        <img src="./branding/kubic/SVG/kubic-logo-icon.svg" class="logo__img" alt="KubicIQ Logo" />
+      </div>
+      <nav class="sidebar__nav">
+        <i class="fa fa-home nav__icon"></i>
+        <i class="fa fa-bookmark nav__icon nav__icon--active"></i>
+      </nav>
+    </aside>
+
+    <main class="dashboard__card">
+      <header class="dashboard__header">
+        <div class="header__left">
+          <i class="fa fa-bookmark"></i>
+          <h1>Practice</h1>
+        </div>
+        <div class="header__tabs">
+          <button class="tab tab--active"><i class="fa fa-bookmark"></i></button>
+          <button class="tab"><i class="fa-solid fa-book"></i></i></button>
+        </div>
+        <div class="header__right">
+          <span>Mastery Score</span>
+          <div class="hexagon">
+            <i class="fa fa-lock"></i>
+          </div>
+        </div>
+      </header>
+
+      <section class="dashboard__main stacked">
+        <div class="intro-box">
+          <h2>Answer 7 more questions to unlock your Mastery Score</h2>
+          <p>
+            To get started, you’ll need to answer 25 questions. This is the first step towards getting you ready for your exam, and will allow us to accurately set your Mastery Score.
+            <a href="#">What is Mastery Score?</a>
+          </p>
+          <button class="btn btn--primary">
+            <i class="fa fa-pen"></i>
+            <span style="margin-left: 0.5rem;">Take a Quiz</span>
+          </button>
+        </div>
+
+        <div class="score-box">
+          <h3><i class="fa fa-chart-pie"></i> Mastery Score</h3>
+          <div class="hexagon--large"><i class="fa fa-lock"></i></div>
+          <p><strong>18/25</strong><br />Unlock Mastery Score by Answering 25 Questions</p>
+        </div>
+
+        <div class="practice-resources-row">
+          <div class="practice-options">
+            <h3>More Ways to Practice</h3>
+            <div class="button-group">
+              <button class="btn btn--outline">
+                <i class="fa fa-pen"></i>
+                Build a Custom Quiz
+                <i class="fa fa-question-circle info-icon"></i>
+              </button>
+              <button class="btn btn--outline">
+                <i class="fa fa-pen"></i>
+                Build a Custom Exam
+                <i class="fa fa-question-circle info-icon"></i>
+              </button>
+              <button class="btn btn--outline">
+                <i class="fa fa-pen"></i>
+                Take a Mock Exam
+                <i class="fa fa-question-circle info-icon"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="resources">
+            <h3>Additional Resources</h3>
+            <div class="button-group">
+              <button class="btn btn--resource"><i class="fa fa-file-alt"></i> View Formula Sheet<i></i></button>
+              <button class="btn btn--resource"><i class="fa fa-file-text"></i> Guide to Written‑Answer Questions<i></i></button>
+              <button class="btn btn--resource"><i class="fa fa-file-text"></i> Knowing You’re Ready
+              <i></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

@@ -4,9 +4,11 @@ interface ResourceCardProps {
   title: string;
   icon: 'formula' | 'guide' | 'ready';
   onClick?: () => void;
+  url?: string;
+  external?: boolean;
 }
 
-export const ResourceCard = ({ title, icon, onClick }: ResourceCardProps) => {
+export const ResourceCard = ({ title, icon, onClick, url, external }: ResourceCardProps) => {
   const getIcon = () => {
     switch (icon) {
       case 'formula':
@@ -31,13 +33,31 @@ export const ResourceCard = ({ title, icon, onClick }: ResourceCardProps) => {
         return null;
     }
   };
-
-  return (
-    <div className={styles.card} onClick={onClick}>
+  const renderContent = () => (
+    <>
       <div className={styles.iconContainer}>
         {getIcon()}
       </div>
       <span className={styles.title}>{title}</span>
+    </>
+  );
+
+  if (url) {
+    return (
+      <a 
+        href={url} 
+        className={styles.card} 
+        target={external ? "_blank" : undefined} 
+        rel={external ? "noopener noreferrer" : undefined}
+      >
+        {renderContent()}
+      </a>
+    );
+  }
+
+  return (
+    <div className={styles.card} onClick={onClick}>
+      {renderContent()}
     </div>
   );
 };
