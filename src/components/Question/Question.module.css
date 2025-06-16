@@ -1,0 +1,118 @@
+.question {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.questionText {
+  margin-bottom: var(--spacing-xl);
+}
+
+.questionNumber {
+  font-family: var(--font-family-primary);
+  font-size: var(--fontSize-lg);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 0 var(--spacing-md);
+}
+
+.text {
+  font-family: var(--font-family-secondary);
+  font-size: var(--fontSize-base);
+  color: var(--color-grey-800);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.options {
+  display: grid;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--spacing-md);
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: var(--color-grey-100);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-align: left;
+}
+
+.option:hover:not(:disabled) {
+  background-color: var(--color-grey-200);
+}
+
+.option.selected {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.option.selected .optionLabel,
+.option.selected .optionText {
+  color: var(--color-white);
+}
+
+.option:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.optionLabel {
+  font-family: var(--font-family-primary);
+  font-size: var(--fontSize-base);
+  font-weight: 700;
+  color: var(--color-primary);
+  min-width: 24px;
+}
+
+.optionText {
+  font-family: var(--font-family-secondary);
+  font-size: var(--fontSize-base);
+  color: var(--color-grey-800);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submitButton {
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-family: var(--font-family-primary);
+  font-size: var(--fontSize-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-base);
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: #2596c7; /* Slightly darker secondary color */
+}
+
+.submitButton:disabled {
+  background-color: var(--color-grey-400);
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .question {
+    padding: var(--spacing-lg);
+  }
+
+  .option {
+    padding: var(--spacing-sm);
+  }
+}

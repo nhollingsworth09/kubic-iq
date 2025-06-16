@@ -1,0 +1,46 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.label {
+  font-family: var(--font-family-secondary);
+  font-size: var(--fontSize-sm);
+  color: var(--color-grey-600);
+  min-width: 80px;
+}
+
+.progressBar {
+  flex: 1;
+  background-color: var(--color-grey-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressBar.sm {
+  height: 4px;
+}
+
+.progressBar.md {
+  height: 8px;
+}
+
+.progressBar.lg {
+  height: 12px;
+}
+
+.fill {
+  height: 100%;
+  background-color: var(--color-secondary);
+  transition: width 0.6s ease-out;
+}
+
+.percentage {
+  font-family: var(--font-family-primary);
+  font-size: var(--fontSize-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  min-width: 48px;
+  text-align: right;
+}
