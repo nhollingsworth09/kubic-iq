@@ -1,0 +1,79 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.hexagon {
+  width: 120px;
+  height: 104px;
+  position: relative;
+  z-index: 1;
+}
+
+.hexagon::before,
+.hexagon::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  border-left: 60px solid transparent;
+  border-right: 60px solid transparent;
+  z-index: -1;
+}
+
+.hexagon::before {
+  bottom: 100%;
+  border-bottom: 30px solid #e5e7eb;
+}
+
+.hexagon::after {
+  top: 100%;
+  border-top: 30px solid #e5e7eb;
+}
+
+.hexagonInner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 120px;
+  height: 104px;
+  background-color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.lockIcon {
+  width: 2rem;
+  height: 2rem;
+  color: #9ca3af;
+}
+
+.scoreDisplay {
+  text-align: center;
+}
+
+.score {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #324262;
+  line-height: 1;
+}
+
+.maxScore {
+  font-size: 1rem;
+  color: #6b7280;
+  line-height: 1;
+}
+
+.statusText {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

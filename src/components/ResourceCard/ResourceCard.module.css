@@ -1,0 +1,39 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.card:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 4px;
+  background-color: #2AAFE1;
+  color: white;
+  flex-shrink: 0;
+}
+
+.iconContainer svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}

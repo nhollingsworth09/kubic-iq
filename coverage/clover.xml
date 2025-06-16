@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1750047498853" clover="3.2.0">
+  <project timestamp="1750047498853" name="All files">
+    <metrics statements="125" coveredstatements="51" conditionals="68" coveredconditionals="22" methods="44" coveredmethods="18" elements="237" coveredelements="91" complexity="0" loc="125" ncloc="125" packages="14" files="15" classes="15"/>
+    <package name="src">
+      <metrics statements="15" coveredstatements="0" conditionals="8" coveredconditionals="0" methods="8" coveredmethods="0"/>
+      <file name="App.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\App.tsx">
+        <metrics statements="7" coveredstatements="0" conditionals="8" coveredconditionals="0" methods="2" coveredmethods="0"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="10" count="0" type="stmt"/>
+        <line num="12" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="13" count="0" type="stmt"/>
+        <line num="16" count="0" type="stmt"/>
+        <line num="48" count="0" type="stmt"/>
+        <line num="49" count="0" type="stmt"/>
+      </file>
+      <file name="setupTests.ts" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\setupTests.ts">
+        <metrics statements="8" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="0"/>
+        <line num="6" count="0" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="10" count="0" type="stmt"/>
+        <line num="11" count="0" type="stmt"/>
+        <line num="12" count="0" type="stmt"/>
+        <line num="20" count="0" type="stmt"/>
+        <line num="25" count="0" type="stmt"/>
+        <line num="27" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components.Badge">
+      <metrics statements="2" coveredstatements="0" conditionals="5" coveredconditionals="0" methods="1" coveredmethods="0"/>
+      <file name="Badge.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\components\Badge\Badge.tsx">
+        <metrics statements="2" coveredstatements="0" conditionals="5" coveredconditionals="0" methods="1" coveredmethods="0"/>
+        <line num="8" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="9" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components.CloudDivider">
+      <metrics statements="2" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
+      <file name="CloudDivider.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\components\CloudDivider\CloudDivider.tsx">
+        <metrics statements="2" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
+        <line num="3" count="0" type="stmt"/>
+        <line num="4" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components.Dashboard">
+      <metrics statements="9" coveredstatements="0" conditionals="4" coveredconditionals="0" methods="4" coveredmethods="0"/>
+      <file name="Dashboard.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\components\Dashboard\Dashboard.tsx">
+        <metrics statements="9" coveredstatements="0" conditionals="4" coveredconditionals="0" methods="4" coveredmethods="0"/>
+        <line num="6" count="0" type="stmt"/>
+        <line num="7" count="0" type="stmt"/>
+        <line num="8" count="0" type="stmt"/>
+        <line num="10" count="0" type="stmt"/>
+        <line num="12" count="0" type="stmt"/>
+        <line num="13" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="15" count="0" type="stmt"/>
+        <line num="18" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="20" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components.ErrorBoundary">
+      <metrics statements="8" coveredstatements="8" conditionals="4" coveredconditionals="4" methods="5" coveredmethods="5"/>
+      <file name="ErrorBoundary.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\components\ErrorBoundary\ErrorBoundary.tsx">
+        <metrics statements="8" coveredstatements="8" conditionals="4" coveredconditionals="4" methods="5" coveredmethods="5"/>
+        <line num="16" count="8" type="stmt"/>
+        <line num="17" count="7" type="stmt"/>
+        <line num="21" count="8" type="stmt"/>
+        <line num="26" count="4" type="stmt"/>
+        <line num="30" count="17" type="cond" truecount="2" falsecount="0"/>
+        <line num="31" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="36" count="1" type="stmt"/>
+        <line num="45" count="9" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components.HexagonScore">
+      <metrics statements="2" coveredstatements="0" conditionals="7" coveredconditionals="0" methods="1" coveredmethods="0"/>
+      <file name="HexagonScore.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\components\HexagonScore\HexagonScore.tsx">
+        <metrics statements="2" coveredstatements="0" conditionals="7" coveredconditionals="0" methods="1" coveredmethods="0"/>
+        <line num="10" count="0" type="cond" truecount="0" falsecount="3"/>
+        <line num="11" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components.Loading">
+      <metrics statements="2" coveredstatements="2" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+      <file name="Loading.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\components\Loading\Loading.tsx">
+        <metrics statements="2" coveredstatements="2" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+        <line num="7" count="2" type="cond" truecount="1" falsecount="0"/>
+        <line num="8" count="3" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components.LoginForm">
+      <metrics statements="14" coveredstatements="14" conditionals="10" coveredconditionals="8" methods="5" coveredmethods="5"/>
+      <file name="LoginForm.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\components\LoginForm\LoginForm.tsx">
+        <metrics statements="14" coveredstatements="14" conditionals="10" coveredconditionals="8" methods="5" coveredmethods="5"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="6" count="8" type="stmt"/>
+        <line num="7" count="8" type="stmt"/>
+        <line num="8" count="8" type="stmt"/>
+        <line num="9" count="8" type="stmt"/>
+        <line num="11" count="8" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="13" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="20" count="8" type="stmt"/>
+        <line num="21" count="2" type="stmt"/>
+        <line num="23" count="8" type="stmt"/>
+        <line num="64" count="1" type="stmt"/>
+        <line num="78" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components.MasteryDashboard">
+      <metrics statements="7" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="0"/>
+      <file name="MasteryDashboard.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\components\MasteryDashboard\MasteryDashboard.tsx">
+        <metrics statements="7" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="0"/>
+        <line num="7" count="0" type="stmt"/>
+        <line num="8" count="0" type="stmt"/>
+        <line num="14" count="0" type="stmt"/>
+        <line num="20" count="0" type="stmt"/>
+        <line num="61" count="0" type="stmt"/>
+        <line num="77" count="0" type="stmt"/>
+        <line num="81" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components.ProgressBar">
+      <metrics statements="3" coveredstatements="0" conditionals="6" coveredconditionals="0" methods="1" coveredmethods="0"/>
+      <file name="ProgressBar.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\components\ProgressBar\ProgressBar.tsx">
+        <metrics statements="3" coveredstatements="0" conditionals="6" coveredconditionals="0" methods="1" coveredmethods="0"/>
+        <line num="10" count="0" type="stmt"/>
+        <line num="16" count="0" type="stmt"/>
+        <line num="18" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components.Question">
+      <metrics statements="13" coveredstatements="13" conditionals="11" coveredconditionals="9" methods="4" coveredmethods="4"/>
+      <file name="Question.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\components\Question\Question.tsx">
+        <metrics statements="13" coveredstatements="13" conditionals="11" coveredconditionals="9" methods="4" coveredmethods="4"/>
+        <line num="26" count="1" type="stmt"/>
+        <line num="31" count="7" type="stmt"/>
+        <line num="32" count="7" type="stmt"/>
+        <line num="34" count="7" type="stmt"/>
+        <line num="35" count="2" type="cond" truecount="3" falsecount="1"/>
+        <line num="37" count="2" type="stmt"/>
+        <line num="38" count="2" type="stmt"/>
+        <line num="39" count="2" type="stmt"/>
+        <line num="42" count="7" type="cond" truecount="2" falsecount="0"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="46" count="6" type="stmt"/>
+        <line num="54" count="24" type="stmt"/>
+        <line num="56" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components.ResourceCard">
+      <metrics statements="8" coveredstatements="0" conditionals="4" coveredconditionals="0" methods="2" coveredmethods="0"/>
+      <file name="ResourceCard.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\components\ResourceCard\ResourceCard.tsx">
+        <metrics statements="8" coveredstatements="0" conditionals="4" coveredconditionals="0" methods="2" coveredmethods="0"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="10" count="0" type="stmt"/>
+        <line num="11" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="13" count="0" type="stmt"/>
+        <line num="19" count="0" type="stmt"/>
+        <line num="25" count="0" type="stmt"/>
+        <line num="31" count="0" type="stmt"/>
+        <line num="35" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components.TabIcons">
+      <metrics statements="2" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
+      <file name="TabIcons.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\components\TabIcons\TabIcons.tsx">
+        <metrics statements="2" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
+        <line num="3" count="0" type="stmt"/>
+        <line num="4" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.contexts">
+      <metrics statements="38" coveredstatements="14" conditionals="8" coveredconditionals="0" methods="6" coveredmethods="3"/>
+      <file name="AuthContext.tsx" path="C:\Users\SoftwareDev\Desktop\github-repos\kubic-iq\src\contexts\AuthContext.tsx">
+        <metrics statements="38" coveredstatements="14" conditionals="8" coveredconditionals="0" methods="6" coveredmethods="3"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="25" count="4" type="stmt"/>
+        <line num="26" count="4" type="stmt"/>
+        <line num="27" count="4" type="stmt"/>
+        <line num="29" count="4" type="stmt"/>
+        <line num="31" count="4" type="stmt"/>
+        <line num="32" count="4" type="stmt"/>
+        <line num="33" count="4" type="stmt"/>
+        <line num="34" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="35" count="0" type="stmt"/>
+        <line num="36" count="0" type="stmt"/>
+        <line num="39" count="0" type="stmt"/>
+        <line num="41" count="0" type="stmt"/>
+        <line num="45" count="4" type="stmt"/>
+        <line num="48" count="4" type="stmt"/>
+        <line num="49" count="0" type="stmt"/>
+        <line num="50" count="0" type="stmt"/>
+        <line num="52" count="0" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="59" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="60" count="0" type="stmt"/>
+        <line num="63" count="0" type="stmt"/>
+        <line num="64" count="0" type="stmt"/>
+        <line num="66" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="67" count="0" type="stmt"/>
+        <line num="69" count="0" type="stmt"/>
+        <line num="73" count="4" type="stmt"/>
+        <line num="74" count="0" type="stmt"/>
+        <line num="75" count="0" type="stmt"/>
+        <line num="77" count="0" type="stmt"/>
+        <line num="79" count="0" type="stmt"/>
+        <line num="83" count="4" type="stmt"/>
+        <line num="90" count="1" type="stmt"/>
+        <line num="91" count="0" type="stmt"/>
+        <line num="92" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="93" count="0" type="stmt"/>
+        <line num="95" count="0" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>
