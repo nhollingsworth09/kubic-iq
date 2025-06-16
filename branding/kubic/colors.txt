@@ -1,0 +1,9 @@
+Dark Blue:
+	RGB: 50,66,98
+	HEX: 324262
+	C<YK: 87%, 75%, 38%, 26%
+
+Light Blue: 
+	RGB: 42, 175, 225
+	HEX: 2AAFE1
+	CMYK: 69%, 12%, 2%, 0%
