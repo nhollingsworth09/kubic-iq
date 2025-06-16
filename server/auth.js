@@ -40,14 +40,18 @@ const User = sequelize.define('User', {
       min: 0,
       max: 3.33 // Maximum allowed sigma
     }
-  },
-  masteryScore: {
+  },  masteryScore: {
     type: DataTypes.FLOAT,
-    defaultValue: 5.0, // Start at middle of 0-10 range
+    defaultValue: null, // Initially null until MIN_ANSWERS threshold is met
     validate: {
       min: 0,
       max: 10
     }
+  },
+  responseCount: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    allowNull: false
   },
   isAdmin: {
     type: DataTypes.BOOLEAN,

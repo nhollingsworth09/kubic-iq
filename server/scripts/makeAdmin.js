@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { User, sequelize } = require('./auth');
+const { User, sequelize } = require('../auth');
 
 async function makeAdmin() {
   try {

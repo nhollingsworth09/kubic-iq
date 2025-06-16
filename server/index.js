@@ -4,6 +4,7 @@ const cors = require('cors');
 const { sequelize, signup, login, getMe, authMiddleware } = require('./auth');
 const questionsRouter = require('./questions');
 const answerRouter = require('./answer');
+const userProgressRouter = require('./userProgress');
 
 const app = express();
 
@@ -21,6 +22,9 @@ app.use('/api/admin/questions', questionsRouter);
 
 // Answer routes
 app.use('/api/answer', answerRouter);
+
+// User progress routes
+app.use('/api/user', userProgressRouter);
 
 // Create database tables and start server
 const PORT = process.env.PORT || 3001;

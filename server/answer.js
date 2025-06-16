@@ -12,6 +12,7 @@ const SIGMA0 = 1.67;
 const BETA = 1;       // performance variance
 const TAU = 0.033;    // dynamics
 const K = 3;         // conservativeness factor for mastery score
+const MIN_ANSWERS = 25; // Minimum number of answers required to show mastery score
 
 // Helper function to clamp values
 const clampValue = (value, min, max) => Math.min(Math.max(value, min), max);
@@ -70,19 +71,30 @@ router.post('/', authMiddleware, async (req, res) => {
       [newUserRating, newQuestionRating] = rate_1vs1(userRating, questionRating);
     } else {
       [newQuestionRating, newUserRating] = rate_1vs1(questionRating, userRating);
-    }
-
-    // Clamp the new ratings to our 0-10 scale
+    }    // Clamp the new ratings to our 0-10 scale
     const newMu = clampValue(newUserRating.mu, 0, 10);
     const newSigma = clampValue(newUserRating.sigma, 0, 3.33);
-    const masteryScore = clampValue(newMu - K * newSigma, 0, 10);
-
-    // Update user's ratings and mastery score
-    await user.update({
+    
+    // TODO: increment response count
+    const responseCount = (user.responseCount || 0) + 1;
+    
+    // Calculate potential mastery score
+    const masteryScoreValue = clampValue(newMu - K * newSigma, 0, 10);
+    
+    // TODO: if count >= MIN_ANSWERS compute/save masteryScore
+    // TODO: else leave null
+    const updatedUserData = {
       trueskill_mu: newMu,
       trueskill_sigma: newSigma,
-      masteryScore
-    }, { transaction: t });
+      responseCount
+    };
+    
+    if (responseCount >= MIN_ANSWERS) {
+      updatedUserData.masteryScore = masteryScoreValue;
+    }
+    
+    // Update user's ratings, response count, and conditionally update mastery score
+    await user.update(updatedUserData, { transaction: t });
 
     // Update question's ratings with clamped values
     await question.update({
@@ -129,13 +141,15 @@ router.post('/', authMiddleware, async (req, res) => {
     });
 
     // Commit transaction
-    await t.commit();
-
+    await t.commit();    // Get updated user for response
+    const updatedUser = await User.findByPk(user.id, { transaction: t });
+    
     // Send response
     res.json({
       success: true,
       correct,
-      masteryScore,
+      responseCount: updatedUser.responseCount,
+      masteryScore: updatedUser.masteryScore,
       nextQuestion: nextQuestion ? {
         id: nextQuestion.id,
         text: nextQuestion.text,
