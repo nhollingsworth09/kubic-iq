@@ -3,47 +3,7 @@
   background-color: #f8fafc;
 }
 
-.header {
-  background-color: #324262;
-  padding: 1.5rem 0;
-  color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.headerContent {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.greeting {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.userName {
-  color: #2AAFE1;
-}
-
-.logoutButton {
-  background-color: transparent;
-  border: 1px solid #ffffff;
-  color: #ffffff;
-  padding: 0.5rem 1.5rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.logoutButton:hover {
-  background-color: #ffffff;
-  color: #324262;
-}
+/* Removed logout button styles */
 
 .main {
   padding: 0;

@@ -1,8 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Badge } from '../Badge/Badge';
-import { TabIcons } from '../TabIcons/TabIcons';
-import { HexagonScore } from '../HexagonScore/HexagonScore';
-import { ResourceCard } from '../ResourceCard/ResourceCard';
 import styles from './MasteryDashboard.module.css';
 
 // Minimum number of answers needed to show mastery score
@@ -18,6 +14,7 @@ export const MasteryDashboard = () => {
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'practice' | 'learn'>('practice');
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
   
   useEffect(() => {
     // Fetch user progress from backend
@@ -45,6 +42,15 @@ export const MasteryDashboard = () => {
     fetchUserProgress();
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  };
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
   const resources = [
     { title: 'View Formula Sheet', icon: 'formula'},
     { title: 'Test Day Strategies', icon: 'guide'},
@@ -59,6 +65,7 @@ export const MasteryDashboard = () => {
 
   const isMasteryUnlocked = userProgress && userProgress.responseCount >= MIN_ANSWERS;
   const remainingQuestions = MIN_ANSWERS - (userProgress?.responseCount || 0);
+  
   return (
     <div className={styles.dashboardContainer}>
       <aside className={styles.sidebar}>
@@ -77,40 +84,74 @@ export const MasteryDashboard = () => {
             </svg>
           </button>
         </nav>
-      </aside>
-      <div className={styles.dashboardCard}>
-        {/* Header Section */}
-        <header className={styles.dashboardHeader}>
-          <div className={styles.headerLeft}>
-            <svg className={styles.headerIcon} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+        <div className={styles.sidebarFooter}>
+          <button className={styles.menuButton} onClick={toggleMenu} aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
             </svg>
-            <h1>Practice</h1>
+          </button>
+        </div>
+        
+        {menuOpen && (
+          <div className={styles.menuOverlay} onClick={toggleMenu}>
+            <div className={styles.menuPopup} onClick={(e) => e.stopPropagation()}>
+              <h3 className={styles.menuTitle}>Menu</h3>
+              <ul className={styles.menuList}>
+                <li>
+                  <button className={styles.menuItem}>
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    Account Management
+                  </button>
+                </li>
+                <li>
+                  <button className={styles.menuItem}>
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+                    </svg>
+                    Privacy Settings
+                  </button>
+                </li>
+                <li>
+                  <button className={styles.menuItem} onClick={handleLogout}>
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                      <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                    Logout
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
-          
-          <div className={styles.headerTabs}>
+        )}
+      </aside>      <div className={styles.dashboardCard}>
+        <div className={styles.tabsContainer}>
+          <div className={styles.pageTabs}>
             <button 
-              className={`${styles.tab} ${activeTab === 'practice' ? styles.tabActive : ''}`}
+              className={`${styles.pageTab} ${activeTab === 'practice' ? styles.pageTabActive : ''}`}
               onClick={() => setActiveTab('practice')}
               aria-label="Practice tab"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                 <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
               </svg>
+              <span>Practice</span>
             </button>
             <button 
-              className={`${styles.tab} ${activeTab === 'learn' ? styles.tabActive : ''}`}
+              className={`${styles.pageTab} ${activeTab === 'learn' ? styles.pageTabActive : ''}`}
               onClick={() => setActiveTab('learn')}
               aria-label="Learn tab"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                 <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
               </svg>
+              <span>Learn</span>
             </button>
           </div>
-            <div className={styles.headerRight}>
+          <div className={styles.masteryBadge}>
             <span>Mastery Score</span>
-            <div className={styles.hexagon}>
+            <div className={styles.hexagonBadge}>
               {!isMasteryUnlocked ? (
                 <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                   <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z"/>
@@ -120,10 +161,10 @@ export const MasteryDashboard = () => {
               )}
             </div>
           </div>
-        </header>
-
+        </div>
         {/* Main Content - Stacked layout to match design */}
         <section className={styles.dashboardMainStacked}>
+
           {/* Intro Box */}
           <div className={styles.introBox}>
             {loading ? (
@@ -134,7 +175,7 @@ export const MasteryDashboard = () => {
                 <p>
                   To get started, you'll need to answer {MIN_ANSWERS} questions. This is the first step towards
                   getting you ready for your exam, and will allow us to accurately set your Mastery Score.
-                  <a href="#" className={styles.infoLink}> What is Mastery Score?</a>
+                  <button className={styles.infoLink}>What is Mastery Score?</button>
                 </p>
                 {userProgress && (
                   <div className={styles.progressWrapper}>
