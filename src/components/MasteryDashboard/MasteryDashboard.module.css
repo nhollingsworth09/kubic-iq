@@ -1,6 +1,10 @@
 /* Variables */
 :root {
   --font-primary: 'Montserrat', sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
   --color-primary-navy: #324262;
   --color-accent-blue: #26B1E2;
   --color-bg-light: #f5f7fa;
@@ -18,7 +22,57 @@
   width: 100%;
   min-height: calc(100vh - 120px);
   background-color: var(--color-bg-light);
-  padding: 2rem 1rem;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 64px;
+  background: var(--color-primary-navy);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0;
+  min-height: 100vh;
+}
+
+.sidebarLogo {
+  margin-bottom: 2rem;
+}
+
+.logoImg {
+  width: 36px;
+  height: auto;
+  filter: brightness(0) invert(1);
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.navIcon {
+  font-size: 1.25rem;
+  color: #a0aec0;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navIcon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.navIconActive,
+.navIcon:hover {
+  color: var(--color-white);
 }
 
 /* Dashboard Card */
@@ -32,6 +86,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  height: fit-content;
 }
 
 /* Header Section */
@@ -54,6 +109,8 @@
 .headerLeft h1 {
   font-size: 1.2rem;
   margin: 0;
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
 }
 
 .headerTabs {
@@ -114,6 +171,7 @@
 .introBox h2 {
   font-size: 1.4rem;
   margin-bottom: 0.75rem;
+  font-weight: var(--font-weight-bold);
 }
 
 .introBox p {
@@ -125,7 +183,7 @@
 .infoLink {
   color: var(--color-accent-blue);
   text-decoration: underline;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Score Box */
@@ -146,6 +204,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-weight: var(--font-weight-bold);
 }
 
 .scoreBox p {
@@ -176,6 +235,7 @@
   margin-bottom: 1.25rem;
   color: var(--color-primary-navy);
   text-align: center;
+  font-weight: var(--font-weight-bold);
 }
 
 .buttonGroup {
@@ -194,7 +254,7 @@
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 0.75rem 1rem;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: var(--color-primary-navy);
   cursor: pointer;
   text-decoration: none;
@@ -220,7 +280,7 @@
   border: none;
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
   margin-top: 1rem;
 }
@@ -245,6 +305,17 @@
   clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%);
 }
 
+.hexagon svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-white);
+}
+
+.hexScore {
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-bold);
+}
+
 .hexagonLarge {
   width: 5rem;
   height: 5rem;
@@ -254,7 +325,7 @@
 
 .scoreDisplay {
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
 }
 
 /* Progress bar */
@@ -286,10 +357,11 @@
 }
 
 .progressText {
-  margin-top: 0.5rem;
-  color: var(--color-muted);
-  font-size: 0.875rem;
+  font-family: 'Montserrat', sans-serif;
   text-align: center;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
 }
 
 /* Icons */

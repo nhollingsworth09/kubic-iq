@@ -19,10 +19,9 @@
   --color-success: #22c55e;
   --color-error: #ef4444;
   --color-warning: #f59e0b;
-  
-  /* Typography */
-  --font-family-primary: 'Nunito', sans-serif;
-  --font-family-secondary: 'Roboto', sans-serif;
+    /* Typography */
+  --font-family-primary: 'Montserrat', sans-serif;
+  --font-family-secondary: 'Montserrat', sans-serif;
   
   /* Font Sizes */
   --fontSize-xs: 0.75rem;

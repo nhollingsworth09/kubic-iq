@@ -47,7 +47,7 @@ export const MasteryDashboard = () => {
 
   const resources = [
     { title: 'View Formula Sheet', icon: 'formula'},
-    { title: 'Guide to Written-Answer Questions', icon: 'guide'},
+    { title: 'Test Day Strategies', icon: 'guide'},
     { title: 'Knowing You\'re Ready', icon: 'ready'}
   ];
 
@@ -59,9 +59,25 @@ export const MasteryDashboard = () => {
 
   const isMasteryUnlocked = userProgress && userProgress.responseCount >= MIN_ANSWERS;
   const remainingQuestions = MIN_ANSWERS - (userProgress?.responseCount || 0);
-
   return (
     <div className={styles.dashboardContainer}>
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarLogo}>
+          <img src="/brand/kubic-logo-icon.svg" className={styles.logoImg} alt="KubicIQ Logo" />
+        </div>
+        <nav className={styles.sidebarNav}>
+          <button className={styles.navIcon}>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+          </button>
+          <button className={`${styles.navIcon} ${styles.navIconActive}`}>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+            </svg>
+          </button>
+        </nav>
+      </aside>
       <div className={styles.dashboardCard}>
         {/* Header Section */}
         <header className={styles.dashboardHeader}>
@@ -92,10 +108,17 @@ export const MasteryDashboard = () => {
               </svg>
             </button>
           </div>
-          
-          <div className={styles.headerRight}>
+            <div className={styles.headerRight}>
             <span>Mastery Score</span>
-            <Badge locked={!isMasteryUnlocked} />
+            <div className={styles.hexagon}>
+              {!isMasteryUnlocked ? (
+                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                  <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z"/>
+                </svg>
+              ) : (
+                <span className={styles.hexScore}>{userProgress?.masteryScore?.toFixed(1)}</span>
+              )}
+            </div>
           </div>
         </header>
 

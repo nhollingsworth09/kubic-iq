@@ -1,0 +1,46 @@
+/* KubicIQ Brand Typography Guidelines */
+
+/* 
+ * PRIMARY TYPEFACE: Montserrat Bold 
+ * SECONDARY TYPEFACE: Montserrat
+ *
+ * The primary English typeface is Montserrat
+ */
+
+html, body {
+  font-family: 'Montserrat', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, button, .btn {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700; /* Bold for headings and buttons */
+}
+
+/* General typography styling */
+h1 {
+  font-weight: 700;
+}
+
+h2, h3 {
+  font-weight: 700;
+}
+
+a {
+  font-weight: 500; /* Medium weight for links */
+}
+
+button, .btn {
+  font-weight: 700; /* Bold for buttons */
+}
+
+/* Ensure proper font rendering */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Override any conflicting font declarations */
+input, textarea, select {
+  font-family: 'Montserrat', sans-serif;
+}
