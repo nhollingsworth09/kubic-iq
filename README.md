@@ -1,7 +1,101 @@
 # Kubic IQ - 🛠️ Project Overview
 
 We’re building an SAT prep web app MVP with React (frontend) and Node.js/Express (backend), using existing HTML/CSS from `ca-page-sources` and design assets from `branding` folder. Key backend logic includes user account management, admin panel, and a TrueSkill/Elo-based adaptive mastery system.
+# 🎯 Product Overview
 
+**Kubic IQ** is an adaptive SAT preparation platform designed to help students maximize their test scores through personalized, data-driven practice.
+
+### What It Does
+
+Students log in and take quizzes or full-length practice exams made up of real SAT-style questions. After every answer, the system recalculates both the student's skill level and the question's difficulty using the **TrueSkill rating algorithm**. Over time, the platform builds an accurate model of each student's strengths and weaknesses, then automatically surfaces questions at the right difficulty level — not too easy, not too hard — to produce the fastest possible skill growth.
+
+### Key Student-Facing Features
+
+- **Adaptive quizzes** — short practice sessions that home in on weak areas
+- **Full-length practice exams** — timed, full SAT-format tests with a complete review mode afterwards
+- **Mastery Score** — a 0–10 score derived from TrueSkill ratings that gives students a single, at-a-glance measure of their SAT readiness
+- **Test history & review** — every completed test is snapshotted so students can revisit questions, see time spent per question, and track mastery score progression over time
+
+### Key Admin Features
+
+- Add, edit, and remove questions via the admin dashboard
+- View and override TrueSkill μ/σ values for any question
+- Monitor student mastery scores and response counts
+
+---
+
+# 🧠 TrueSkill Adaptive Engine
+
+The adaptive difficulty system is built on the **TrueSkill** Bayesian ranking algorithm (via [`ts-trueskill`](https://www.npmjs.com/package/ts-trueskill)). Each student and each question carries two values:
+
+| Symbol | Meaning |
+|--------|---------|
+| μ (mu) | Estimated skill/difficulty — higher = more skilled / harder |
+| σ (sigma) | Uncertainty — decreases as more data is collected |
+
+**After every answer**, the backend treats the interaction as a 1-vs-1 match:
+- Correct answer → student "beats" the question → student μ rises, question μ falls
+- Wrong answer → question "beats" the student → student μ falls, question μ rises
+
+**Mastery Score** is derived as `μ - 3σ`, clamped to 0–10. This conservative estimate only converges to a stable number once the student has answered ≥ 25 questions.
+
+**Relevant source files:**
+
+| File | Purpose |
+|------|---------|
+| [server/answer.js](server/answer.js) | Core rating update logic — `rate_1vs1` called on every POST `/api/answer` |
+| [server/auth.js](server/auth.js) | User model — stores `trueskill_mu`, `trueskill_sigma`, `masteryScore` |
+| [server/models/question.js](server/models/question.js) | Question model — stores per-question `mu` and `sigma` |
+| [server/userProgress.js](server/userProgress.js) | Returns current mastery score to the frontend |
+
+**Configuration constants** (in [server/answer.js](server/answer.js)):
+
+```js
+const MU0    = 5;     // Starting mean for all users and questions
+const SIGMA0 = 1.67;  // Starting uncertainty
+const BETA   = 1;     // Performance variance
+const TAU    = 0.033; // Skill dynamics (allows ratings to drift over time)
+const K      = 3;     // Mastery score conservativeness: masteryScore = μ - K*σ
+const MIN_ANSWERS = 25; // Minimum answers before mastery score is shown
+```
+
+---
+
+# 🗄️ Question Database
+
+Questions are stored in a **SQLite** database (via Sequelize ORM) at `server/db/`. Each question record contains:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Primary key |
+| `text` | TEXT | Question body |
+| `options` | JSON array | Answer choices (multiple-choice); empty for student-produced |
+| `correctAnswer` | STRING | Index (0-based) for multiple-choice, or exact string for student-produced |
+| `questionType` | STRING | `"multiple-choice"` or `"student-produced"` |
+| `mu` | FLOAT | TrueSkill difficulty mean (0–10, default 5.0) |
+| `sigma` | FLOAT | TrueSkill difficulty uncertainty (0–3.33, default 1.67) |
+| `tags` | JSON array | Topic tags used for adaptive filtering (e.g. `["algebra", "linear-equations"]`) |
+
+**Relevant source files:**
+
+| File | Purpose |
+|------|---------|
+| [server/models/question.js](server/models/question.js) | Sequelize model definition |
+| [server/questions.js](server/questions.js) | Admin CRUD API (`GET/POST/PUT/DELETE /api/admin/questions`) |
+| [server/routes/questions.js](server/routes/questions.js) | Student-facing questions API (`GET /api/questions/random`) |
+| [server/scripts/sampleQuestions.js](server/scripts/sampleQuestions.js) | Seed data — SAT-style sample questions |
+| [server/scripts/initializeDatabase.js](server/scripts/initializeDatabase.js) | Seeds questions + default accounts on first run |
+
+To reset and re-seed the question database:
+
+```bash
+cd server
+node scripts/initializeDatabase.js
+```
+
+> Warning: this uses `sequelize.sync({ force: true })` and will **drop all existing data**.
+
+---
 # 📁 Project Structure
 
 - `/ca-page-sources/` – Contains HTML & CSS from Coaching Actuaries (use for components/layout)
@@ -9,6 +103,114 @@ We’re building an SAT prep web app MVP with React (frontend) and Node.js/Expre
 - `src/` – React frontend code
 - `server/` – Node.js Express backend
 - `db/` – Schema definitions, migrations, seed files
+
+# 🚀 Local Development Setup
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) v16 or later
+- npm (comes with Node.js)
+
+## Installation
+
+Install dependencies for both the frontend and the backend:
+
+```bash
+# Install frontend dependencies (from project root)
+npm install
+
+# Install backend dependencies
+cd server
+npm install
+cd ..
+```
+
+## Running the App Locally
+
+The frontend dev server proxies API requests to the backend (configured via `"proxy": "http://localhost:3001"` in `package.json`), so both must be running simultaneously.
+
+**Terminal 1 – Start the backend (port 3001):**
+```bash
+cd server
+npm run dev       # uses nodemon for auto-reload on file changes
+# or
+npm start         # plain node, no auto-reload
+```
+
+**Terminal 2 – Start the frontend (port 3000):**
+```bash
+npm start
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser. The app will hot-reload on source changes.
+
+> **Windows shortcut:** Run `start-dev.bat` from the project root to install dependencies and launch both servers automatically.
+
+## Running Tests
+
+### Frontend Tests (Jest + React Testing Library)
+
+```bash
+# Run all tests once with coverage report
+npm test
+
+# Run tests in interactive watch mode
+npm run test:watch
+```
+
+Coverage output is written to the `coverage/` directory.
+
+### Backend Tests
+
+The backend does not yet have a dedicated test runner configured. API endpoints can be tested manually via tools like [Postman](https://www.postman.com/) or curl once the server is running.
+
+### Interactive Test Menu (Windows)
+
+```bash
+test-system.bat
+```
+
+This menu-driven script lets you test individual subsystems:
+1. Server connection
+2. Database & questions API
+3. Sample question seeding
+4. Test user creation
+5. Frontend only
+6. Full system
+
+## Seeded Development Accounts
+
+When the backend starts with an empty database, `initializeDatabase.js` runs automatically and seeds the following default accounts:
+
+### Admin Account (auto-seeded on first run)
+| Field | Value |
+|-------|-------|
+| Email | `admin@kubic.com` |
+| Password | `admin` |
+| Role | Admin |
+
+> **Note:** Running `node server/scripts/fixDatabaseAndCreateAdmin.js` will upsert the admin account with password `admin123` instead.
+
+### Test User Account
+A test user is auto-created on server startup if it doesn't already exist:
+
+| Field | Value |
+|-------|-------|
+| Email | `test@example.com` |
+| Password | `password123` |
+| Role | Student |
+
+> These credentials are for **local development only**. Never use them in production.
+
+## Building for Production
+
+```bash
+npm run build
+```
+
+The optimized static bundle is output to the `build/` directory and can be served by any static file host or the Express server.
+
+---
 
 # 1. Authentication & Account Management
 

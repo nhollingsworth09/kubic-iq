@@ -23,6 +23,15 @@ module.exports = (sequelize) => {
         onDelete: 'CASCADE'
       }
     },
+    testId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'TestHistories',
+        key: 'id',
+        onDelete: 'CASCADE'
+      }
+    },
     selectedOption: {
       type: DataTypes.INTEGER,
       allowNull: false

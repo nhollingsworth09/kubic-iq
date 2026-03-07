@@ -1,0 +1,275 @@
+/* Question Styles */
+.questionContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.questionMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.questionProgress {
+  font-size: 0.9rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.markReview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #4a5568;
+  cursor: pointer;
+}
+
+.questionText {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #2d3748;
+  margin-bottom: 2rem;
+}
+
+/* Multiple Choice Question Styles */
+.choices {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.choice:hover {
+  border-color: #cbd5e0;
+  background-color: #f8fafc;
+}
+
+.choice.selected {
+  border-color: #26B1E2;
+  background-color: rgba(38, 177, 226, 0.1);
+}
+
+.choice.eliminated {
+  opacity: 0.6;
+  text-decoration: line-through;
+  background-color: #f7fafc;
+}
+
+.choiceLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.choiceLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background-color: #f1f5f9;
+  border-radius: 50%;
+  font-weight: 600;
+}
+
+.choice.selected .choiceLabel {
+  background-color: #26B1E2;
+  color: white;
+}
+
+.choiceText {
+  font-size: 1rem;
+}
+
+.eliminateButton {
+  background: none;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.eliminateButton:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e0;
+}
+
+/* Student Response Question Styles */
+.studentResponseContainer {
+  display: flex;
+  gap: 2rem;
+}
+
+.sidebarPanel {
+  width: 300px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.sidebarHeader {
+  background: #324262;
+  color: white;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebarHeader h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.sidebarBody {
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+.directionsList {
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.directionsList li {
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: #4a5568;
+}
+
+.examplesTable {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.examplesTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.examplesTable th,
+.examplesTable td {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.examplesTable th {
+  background-color: #f1f5f9;
+  font-weight: 600;
+}
+
+.showDirectionsButton {
+  background: none;
+  border: 1px solid #26B1E2;
+  color: #26B1E2;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.studentResponseInput {
+  margin-bottom: 2rem;
+}
+
+.studentInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  font-family: inherit;
+}
+
+.studentInput:focus {
+  outline: none;
+  border-color: #26B1E2;
+}
+
+.answerPreview {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 1rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Navigation Buttons */
+.navigationButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.navButton {
+  background: none;
+  border: 1px solid #324262;
+  color: #324262;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.navButton:hover {
+  background: rgba(50, 66, 98, 0.1);
+}
+
+.navButton.primary {
+  background: #324262;
+  color: white;
+}
+
+.navButton.primary:hover {
+  background: #253048;
+}
+
+.navButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

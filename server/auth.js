@@ -42,7 +42,7 @@ const User = sequelize.define('User', {
     }
   },  masteryScore: {
     type: DataTypes.FLOAT,
-    defaultValue: null, // Initially null until MIN_ANSWERS threshold is met
+    defaultValue: 5.0, // Default starting mastery score
     validate: {
       min: 0,
       max: 10
@@ -107,7 +107,8 @@ const signup = async (req, res) => {
     const user = await User.create({
       email,
       password: hashedPassword,
-      displayName
+      displayName,
+      masteryScore: 5.0
     });
 
     // Generate JWT

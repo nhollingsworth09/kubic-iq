@@ -1,0 +1,103 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.leftSection, .rightSection {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+
+.rightSection {
+  align-items: flex-end;
+}
+
+.middleSection {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.questionNumber {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #324262;
+}
+
+.questionTime {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-top: 4px;
+}
+
+.overviewButton {
+  background-color: #324262;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.overviewButton:hover {
+  background-color: #2a3752;
+}
+
+.timerBox {
+  text-align: right;
+}
+
+.timerLabel {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.timer {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #dc3545;
+}
+
+.exitButton {
+  margin-top: 8px;
+  background-color: transparent;
+  color: #6c757d;
+  border: 1px solid #6c757d;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.exitButton:hover {
+  background-color: #6c757d;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .leftSection, .rightSection {
+    width: 100%;
+    align-items: center;
+    min-width: auto;
+  }
+  
+  .rightSection {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+}

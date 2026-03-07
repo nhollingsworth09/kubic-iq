@@ -1,0 +1,158 @@
+.historyContainer {
+  background-color: var(--color-white);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px var(--color-shadow);
+  width: 100%;
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.historyTitle {
+  font-size: 1.25rem;
+  color: var(--color-primary-navy);
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.testList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.testItem {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: #fafafa;
+}
+
+.testHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.testType {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary-navy);
+}
+
+.testDate {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.testStats {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  margin-bottom: 0.25rem;
+}
+
+.statValue {
+  font-weight: var(--font-weight-semibold);
+}
+
+.highScore {
+  color: var(--color-success);
+}
+
+.lowScore {
+  color: var(--color-error);
+}
+
+.testTopics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.topicTag {
+  background-color: rgba(38, 177, 226, 0.1);
+  color: var(--color-accent-blue);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.moreTopics {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.emptyState {
+  background-color: #f8fafc;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.emptyState p {
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
+.masteryChange {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--color-border);
+}
+
+.masteryLabel {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  font-weight: var(--font-weight-semibold);
+}
+
+.masteryValue {
+  font-weight: bold;
+  font-size: 0.925rem;
+}
+
+.positiveChange {
+  color: var(--color-success);
+}
+
+.negativeChange {
+  color: var(--color-error);
+}
+
+.testActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.viewResultsButton {
+  background-color: var(--color-primary-navy);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.viewResultsButton:hover {
+  background-color: #253048;
+}

@@ -1,0 +1,696 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+export interface Question {
+  id: string;
+  text: string;
+  options?: string[];
+  correctAnswer: string | number; // Can be number (index) for multiple-choice or string for student-produced
+  mu: number;
+  sigma: number;
+  tags: string[];
+  questionType: 'multiple-choice' | 'student-produced';
+}
+
+interface QuestionTimeTracking {
+  questionId: string;
+  timeSpent: number;
+  startTime: number | null;
+  endTime: number | null;
+  visits: number;
+}
+
+interface Answer {
+  questionId: string;
+  selectedOption?: number;
+  textAnswer?: string;
+  isMarkedForReview: boolean;
+  isCorrect?: boolean;
+}
+
+// Test snapshot data structure - used when submitting or loading tests
+interface TestSnapshot {
+  questions: Question[];
+  answers: Answer[];
+  timeTracking: QuestionTimeTracking[];
+  testStartTime: number | null;
+  testEndTime: number | null;
+  testDuration: number;
+}
+
+interface TestContextValue {
+  testId: string | null;
+  testType: 'quiz' | 'custom' | 'exam' | null;
+  questions: Question[];
+  currentQuestionIndex: number;
+  answers: Answer[];
+  timeTracking: QuestionTimeTracking[];
+  testStartTime: number | null;
+  testEndTime: number | null;
+  testDuration: number; // in seconds
+  remainingTime: number;
+  isTestComplete: boolean;
+  loading: boolean;
+  error: string | null;
+  masteryScoreChange: number | null;
+  masteryScoreBefore: number | null;
+  masteryScoreAfter: number | null;
+  
+  // Navigation functions
+  goToNextQuestion: () => void;
+  goToPreviousQuestion: () => void;
+  goToQuestion: (index: number) => void;
+  
+  // Answer management
+  setAnswer: (answer: { selectedOption?: number; textAnswer?: string }) => void;
+  toggleMarkForReview: () => void;
+  
+  // Test control functions
+  startTest: (testType: 'quiz' | 'custom' | 'exam', topics: string[], questionCount: number) => Promise<void>;
+  submitTest: () => Promise<void>;
+  exitTest: () => void;
+  loadHistoricalTest: (testId: string) => Promise<void>;
+}
+
+const TestContext = createContext<TestContextValue | undefined>(undefined);
+
+interface TestProviderProps {
+  children: ReactNode;
+}
+
+const MINUTE_IN_SECONDS = 60;
+const DEFAULT_TEST_DURATION = 70 * MINUTE_IN_SECONDS; // 70 minutes in seconds
+
+export const TestProvider: React.FC<TestProviderProps> = ({ children }) => {
+  // Test state
+  const [testId, setTestId] = useState<string | null>(null);
+  const [testType, setTestType] = useState<'quiz' | 'custom' | 'exam' | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<Answer[]>([]);
+  const [timeTracking, setTimeTracking] = useState<QuestionTimeTracking[]>([]);
+  const [testStartTime, setTestStartTime] = useState<number | null>(null);
+  const [testEndTime, setTestEndTime] = useState<number | null>(null);
+  const [testDuration, setTestDuration] = useState<number>(DEFAULT_TEST_DURATION);
+  const [remainingTime, setRemainingTime] = useState<number>(DEFAULT_TEST_DURATION);
+  const [isTestComplete, setIsTestComplete] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+  const [masteryScoreChange, setMasteryScoreChange] = useState<number | null>(null);
+  const [masteryScoreBefore, setMasteryScoreBefore] = useState<number | null>(null);
+  const [masteryScoreAfter, setMasteryScoreAfter] = useState<number | null>(null);
+
+  // Initialize time tracking for a question
+  const initializeTimeTrackingForQuestion = (questionId: string) => {
+    return {
+      questionId,
+      timeSpent: 0,
+      startTime: null,
+      endTime: null,
+      visits: 0,
+    };
+  };
+
+  // Start tracking time for the current question
+  const startTrackingCurrentQuestion = () => {
+    if (questions.length === 0 || currentQuestionIndex >= questions.length) return;
+
+    const currentQuestionId = questions[currentQuestionIndex].id;
+    setTimeTracking(prevTracking => {
+      const updatedTracking = [...prevTracking];
+      const trackingIndex = updatedTracking.findIndex(t => t.questionId === currentQuestionId);
+      
+      if (trackingIndex !== -1) {
+        updatedTracking[trackingIndex] = {
+          ...updatedTracking[trackingIndex],
+          startTime: Date.now(),
+          visits: updatedTracking[trackingIndex].visits + 1,
+        };
+      }
+      
+      return updatedTracking;
+    });
+  };
+
+  // Stop tracking time for the current question
+  const stopTrackingCurrentQuestion = () => {
+    if (questions.length === 0 || currentQuestionIndex >= questions.length) return;
+
+    const currentQuestionId = questions[currentQuestionIndex].id;
+    setTimeTracking(prevTracking => {
+      const updatedTracking = [...prevTracking];
+      const trackingIndex = updatedTracking.findIndex(t => t.questionId === currentQuestionId);
+      
+      if (trackingIndex !== -1 && updatedTracking[trackingIndex].startTime) {
+        const now = Date.now();
+        const timeSpent = updatedTracking[trackingIndex].timeSpent +
+          (now - (updatedTracking[trackingIndex].startTime || 0)) / 1000;
+        
+        updatedTracking[trackingIndex] = {
+          ...updatedTracking[trackingIndex],
+          timeSpent,
+          startTime: null,
+          endTime: now,
+        };
+      }
+      
+      return updatedTracking;
+    });
+  };
+
+  // Navigation functions
+  const goToNextQuestion = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      stopTrackingCurrentQuestion();
+      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+    }
+  };
+
+  const goToPreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      stopTrackingCurrentQuestion();
+      setCurrentQuestionIndex(prevIndex => prevIndex - 1);
+    }
+  };
+
+  const goToQuestion = (index: number) => {
+    if (index >= 0 && index < questions.length && index !== currentQuestionIndex) {
+      stopTrackingCurrentQuestion();
+      setCurrentQuestionIndex(index);
+    }
+  };
+
+  // Answer management
+  const setAnswer = (answer: { selectedOption?: number; textAnswer?: string }) => {
+    if (questions.length === 0 || currentQuestionIndex >= questions.length) return;
+
+    const currentQuestionId = questions[currentQuestionIndex].id;
+    setAnswers(prevAnswers => {
+      const updatedAnswers = [...prevAnswers];
+      const answerIndex = updatedAnswers.findIndex(a => a.questionId === currentQuestionId);
+      
+      if (answerIndex !== -1) {
+        updatedAnswers[answerIndex] = {
+          ...updatedAnswers[answerIndex],
+          ...answer,
+        };
+      }
+      
+      return updatedAnswers;
+    });
+  };
+
+  const toggleMarkForReview = () => {
+    if (questions.length === 0 || currentQuestionIndex >= questions.length) return;
+
+    const currentQuestionId = questions[currentQuestionIndex].id;
+    setAnswers(prevAnswers => {
+      const updatedAnswers = [...prevAnswers];
+      const answerIndex = updatedAnswers.findIndex(a => a.questionId === currentQuestionId);
+      
+      if (answerIndex !== -1) {
+        updatedAnswers[answerIndex] = {
+          ...updatedAnswers[answerIndex],
+          isMarkedForReview: !updatedAnswers[answerIndex].isMarkedForReview,
+        };
+      }
+      
+      return updatedAnswers;
+    });
+  };
+  // Grade the answers
+  const evalAnswers = () => {
+    return answers.map(answer => {
+      const question = questions.find(q => q.id === answer.questionId);
+      
+      if (!question) return answer;
+      
+      let isCorrect = false;
+      
+      if (question.questionType === 'multiple-choice') {
+        isCorrect = answer.selectedOption !== undefined && 
+          answer.selectedOption === Number(question.correctAnswer);
+      } else if (question.questionType === 'student-produced') {
+        isCorrect = answer.textAnswer !== undefined && 
+          answer.textAnswer.trim().toLowerCase() === String(question.correctAnswer).trim().toLowerCase();
+      }
+      
+      return { ...answer, isCorrect };
+    });
+  };
+
+  // Test control functions
+  const startTest = async (
+    testType: 'quiz' | 'custom' | 'exam',
+    topics: string[] = [],
+    questionCount: number = 10
+  ) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Clear previous test state
+      setTestId(null);
+      setQuestions([]);
+      setAnswers([]);
+      setTimeTracking([]);
+      setCurrentQuestionIndex(0);
+      setIsTestComplete(false);
+      setTestEndTime(null);
+      
+      // Set test type
+      setTestType(testType);
+      
+      // Fetch questions based on test type
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No authentication token found');
+      
+      let url = `/api/questions/random?count=${questionCount}`;
+      if (topics.length > 0) {
+        url += `&topics=${topics.join(',')}`;
+      }
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch questions');
+      }
+      
+      const data = await response.json();
+      
+      if (!data.success || !Array.isArray(data.questions)) {
+        throw new Error('Invalid response format');
+      }
+      
+      // Set questions
+      setQuestions(data.questions);
+        // Initialize answers with empty values
+      const initialAnswers = data.questions.map((question: Question) => ({
+        questionId: question.id,
+        isMarkedForReview: false
+      }));
+      setAnswers(initialAnswers);
+      
+      // Initialize time tracking
+      const initialTimeTracking = data.questions.map((question: Question) => 
+        initializeTimeTrackingForQuestion(question.id)
+      );
+      setTimeTracking(initialTimeTracking);
+      
+      // Set test start time and duration
+      const now = Date.now();
+      setTestStartTime(now);
+      
+      // Set duration based on test type
+      let duration = DEFAULT_TEST_DURATION;
+      if (testType === 'quiz') {
+        duration = Math.min(60 * MINUTE_IN_SECONDS, questionCount * 3 * MINUTE_IN_SECONDS);
+      } else if (testType === 'custom') {
+        duration = questionCount * 2 * MINUTE_IN_SECONDS;
+      }
+      setTestDuration(duration);
+      setRemainingTime(duration);
+      
+      // Generate a random test ID
+      const newTestId = `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setTestId(newTestId);    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to start test');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const submitTest = async () => {
+    if (!testId || questions.length === 0) return;
+
+    try {
+      setLoading(true);
+      
+      // Calculate final time spent on each question
+      const finalTimeTracking = timeTracking.map(track => {
+        if (track.startTime && !track.endTime) {
+          return {
+            ...track,
+            endTime: Date.now(),
+            timeSpent: track.timeSpent + (Date.now() - (track.startTime || 0)) / 1000,
+          };
+        }
+        return track;
+      });
+
+      const endTime = Date.now();
+      
+      // Process, grade and submit answers
+      const evaluatedAnswers = evalAnswers();
+
+      // Update test state with graded answers
+      setAnswers(evaluatedAnswers);
+      setTimeTracking(finalTimeTracking);
+      setTestEndTime(endTime);
+      setIsTestComplete(true);
+
+      // Clear timer
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        setTimerInterval(null);
+      }
+      
+      try {
+        // Only save completed tests (not ones that were exited)
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No authentication token found');
+        
+        // Calculate duration in seconds
+        const duration = Math.round((endTime - (testStartTime || 0)) / 1000);
+        
+        // Count correct answers
+        const correctCount = evaluatedAnswers.filter(a => a.isCorrect).length;
+        
+        // Extract topics from questions
+        const topics = Array.from(new Set(questions.flatMap(q => q.tags))); 
+        
+        // Get user data to calculate mastery score changes
+        const userResponse = await fetch('/api/user/progress', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!userResponse.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+        
+        const userData = await userResponse.json();
+        
+        // Calculate mastery score impact
+        const masteryScoreBefore = userData.masteryScore || null;
+        // Use our formula
+        const masteryScoreChange = masteryScoreBefore !== null ? 
+          (correctCount / questions.length - 0.5) * 0.2 : null;
+        const masteryScoreAfter = masteryScoreBefore !== null ?
+          Math.min(10, Math.max(0, masteryScoreBefore + masteryScoreChange)) : null;
+        
+        // Update context state with mastery scores
+        setMasteryScoreBefore(masteryScoreBefore);
+        setMasteryScoreChange(masteryScoreChange);
+        setMasteryScoreAfter(masteryScoreAfter);
+        
+        // Create a complete test snapshot
+        const testSnapshot = {
+          questions: questions.map(q => ({
+            id: q.id,
+            text: q.text,
+            options: q.options,
+            correctAnswer: q.correctAnswer,
+            tags: q.tags,
+            questionType: q.questionType,
+            mu: q.mu,
+            sigma: q.sigma
+          })),
+          answers: evaluatedAnswers.map(a => ({
+            questionId: a.questionId,
+            selectedOption: a.selectedOption,
+            textAnswer: a.textAnswer,
+            isMarkedForReview: a.isMarkedForReview,
+            isCorrect: a.isCorrect
+          })),
+          timeTracking: finalTimeTracking,
+          testStartTime,
+          testEndTime: endTime,
+          testDuration: duration
+        };
+            
+        // Submit complete test snapshot to backend
+        const response = await fetch('/api/test-snapshots', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            testType,
+            questionCount: questions.length,
+            correctCount,
+            duration,
+            topics,
+            masteryScoreChange,
+            masteryScoreBefore,
+            masteryScoreAfter,
+            snapshot: testSnapshot
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to save test results');
+        }
+        
+        const testResult = await response.json();
+        const savedTestId = testResult.testId;
+        
+        if (savedTestId) {
+          // Store the test ID in the context state
+          setTestId(savedTestId);
+          
+          // Also save in session storage for quick access
+          try {
+            sessionStorage.setItem(`test_${savedTestId}`, JSON.stringify({
+              testId: savedTestId,
+              snapshot: testSnapshot,
+              masteryScoreBefore,
+              masteryScoreAfter,
+              masteryScoreChange,
+              testType,
+              createdAt: new Date().toISOString()
+            }));
+          } catch (e) {
+            console.error('Failed to store test in session storage:', e);
+            // Continue even if storage fails
+          }
+          
+          // Dispatch custom event to notify that a test was completed
+          window.dispatchEvent(new Event('test-completed'));
+        }
+        
+        console.log('Test submitted successfully');
+      } catch (error) {
+        console.error('Error submitting test:', error);
+        // Continue with the process even if saving fails
+      }      // Navigation to results page would be handled by the component
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to submit test');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const exitTest = () => {
+    // Clear test state
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      setTimerInterval(null);
+    }
+    
+    setTestId(null);
+    setTestType(null);
+    setQuestions([]);
+    setAnswers([]);
+    setTimeTracking([]);
+    setCurrentQuestionIndex(0);
+    setTestStartTime(null);
+    setTestEndTime(null);
+    setIsTestComplete(false);
+    setRemainingTime(DEFAULT_TEST_DURATION);
+    setError(null);
+  };
+
+  const loadHistoricalTest = async (testId: string) => {
+    if (!testId) return;
+    
+    try {
+      setLoading(true);
+      setError(null); // Clear any previous errors
+      
+      console.log(`Loading test snapshot for ID: ${testId}`);
+      
+      // First try to get from session storage for faster loading
+      try {
+        const cachedTest = sessionStorage.getItem(`test_${testId}`);
+        if (cachedTest) {
+          const parsedTest = JSON.parse(cachedTest);
+          console.log('Found test in session storage:', testId);
+          
+          // Set all the test state from the cached snapshot
+          setTestId(testId);
+          setTestType(parsedTest.testType);
+          setQuestions(parsedTest.snapshot.questions);
+          setAnswers(parsedTest.snapshot.answers);
+          setTimeTracking(parsedTest.snapshot.timeTracking);
+          setTestStartTime(parsedTest.snapshot.testStartTime);
+          setTestEndTime(parsedTest.snapshot.testEndTime);
+          setIsTestComplete(true);
+          setCurrentQuestionIndex(0);
+          setMasteryScoreBefore(parsedTest.masteryScoreBefore);
+          setMasteryScoreAfter(parsedTest.masteryScoreAfter);
+          setMasteryScoreChange(parsedTest.masteryScoreChange);
+          setLoading(false);
+          return;
+        }
+      } catch (e) {
+        console.error('Error reading from session storage:', e);
+        // Continue to fetch from API if sessionStorage fails
+      }
+      
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No authentication token found');
+      
+      // Fetch test snapshot from API
+      const response = await fetch(`/api/test-snapshots/${testId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        cache: 'no-store' // Prevent cache issues
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to load test snapshot');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.test && data.test.snapshot) {
+        console.log('Historical test snapshot loaded successfully:', data.test.id);
+        
+        const testSnapshot = data.test.snapshot;
+        
+        // Set all the test state to recreate the test as it was submitted
+        setTestId(testId);
+        setTestType(data.test.testType);
+        setQuestions(testSnapshot.questions);
+        setAnswers(testSnapshot.answers);
+        setTimeTracking(testSnapshot.timeTracking);
+        setTestStartTime(testSnapshot.testStartTime);
+        setTestEndTime(testSnapshot.testEndTime);
+        setIsTestComplete(true);
+        setCurrentQuestionIndex(0);
+        setMasteryScoreBefore(data.test.masteryScoreBefore);
+        setMasteryScoreAfter(data.test.masteryScoreAfter);
+        setMasteryScoreChange(data.test.masteryScoreChange);
+        
+        // Store in session storage for faster future access
+        try {
+          sessionStorage.setItem(`test_${testId}`, JSON.stringify({
+            testId: testId,
+            snapshot: testSnapshot,
+            masteryScoreBefore: data.test.masteryScoreBefore,
+            masteryScoreAfter: data.test.masteryScoreAfter,
+            masteryScoreChange: data.test.masteryScoreChange,
+            testType: data.test.testType,
+            createdAt: data.test.createdAt
+          }));
+        } catch (e) {
+          console.error('Failed to store test in session storage:', e);
+          // Continue even if storage fails
+        }
+      } else {
+        console.error('Invalid or incomplete test snapshot data:', data);
+        throw new Error('Invalid test snapshot data');
+      }
+    } catch (error) {
+      console.error('Error loading test snapshot:', error);
+      setError('Failed to load test snapshot. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update timer every second
+  useEffect(() => {
+    if (!isTestComplete && testStartTime && !timerInterval) {
+      const interval = setInterval(() => {
+        const now = Date.now();
+        const elapsedSeconds = Math.floor((now - testStartTime) / 1000);
+        const remaining = Math.max(0, testDuration - elapsedSeconds);
+        
+        setRemainingTime(remaining);
+        
+        if (remaining === 0) {
+          // Time's up, submit the test
+          clearInterval(interval);
+          submitTest();
+        }
+      }, 1000);
+      
+      setTimerInterval(interval);
+      
+      return () => {
+        clearInterval(interval);
+        setTimerInterval(null);
+      };
+    }
+  }, [testStartTime, testDuration, isTestComplete]);
+
+  // Start tracking time when changing questions
+  useEffect(() => {
+    if (!isTestComplete && questions.length > 0) {
+      startTrackingCurrentQuestion();
+    }
+    
+    return () => {
+      if (!isTestComplete && questions.length > 0) {
+        stopTrackingCurrentQuestion();
+      }
+    };
+  }, [currentQuestionIndex, questions, isTestComplete]);
+
+  // Context value
+  const contextValue: TestContextValue = {
+    testId,
+    testType,
+    questions,
+    currentQuestionIndex,
+    answers,
+    timeTracking,
+    testStartTime,
+    testEndTime,
+    testDuration,
+    remainingTime,
+    isTestComplete,
+    loading,
+    error,
+    masteryScoreChange,
+    masteryScoreBefore,
+    masteryScoreAfter,
+    
+    goToNextQuestion,
+    goToPreviousQuestion,
+    goToQuestion,
+    
+    setAnswer,
+    toggleMarkForReview,
+    
+    startTest,
+    submitTest,
+    exitTest,
+    loadHistoricalTest,
+  };
+
+  return (
+    <TestContext.Provider value={contextValue}>
+      {children}
+    </TestContext.Provider>
+  );
+};
+
+export const useTest = () => {
+  const context = useContext(TestContext);
+  if (!context) {
+    throw new Error('useTest must be used within a TestProvider');
+  }
+  return context;
+};
+
+export default TestContext;

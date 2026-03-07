@@ -1,0 +1,161 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.header {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #324262;
+}
+
+.content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.footer {
+  padding: 16px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.closeButton {
+  background-color: #324262;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.closeButton:hover {
+  background-color: #2a3752;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  margin: 0 10px 10px 0;
+}
+
+.statusIndicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.questionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 12px;
+}
+
+.questionItem {
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.questionItem:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.questionNumber {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.questionTime {
+  font-size: 0.8rem;
+  margin-top: 5px;
+  color: #666;
+}
+
+/* Status colors */
+.answered {
+  background-color: #d4edda;
+}
+
+.notAnswered {
+  background-color: #f8f9fa;
+}
+
+.review {
+  background-color: #fff3cd;
+  border: 2px solid #ffc107;
+}
+
+.current {
+  border: 2px solid #324262;
+}
+
+/* Legend colors */
+.legend .answered {
+  background-color: #d4edda;
+}
+
+.legend .notAnswered {
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+}
+
+.legend .review {
+  background-color: #fff3cd;
+  border: 2px solid #ffc107;
+}
+
+.legend .current {
+  background-color: white;
+  border: 2px solid #324262;
+}
+
+.stats {
+  display: flex;
+  gap: 20px;
+  font-weight: bold;
+}

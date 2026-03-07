@@ -19,7 +19,7 @@ const clampValue = (value, min, max) => Math.min(Math.max(value, min), max);
 
 // POST /api/answer - Process user's answer and return next question
 router.post('/', authMiddleware, async (req, res) => {
-  const { questionId, selectedOption } = req.body;
+  const { questionId, selectedOption, testId } = req.body;
 
   // Validate request body
   if (!questionId || selectedOption === undefined) {
@@ -100,14 +100,13 @@ router.post('/', authMiddleware, async (req, res) => {
     await question.update({
       mu: clampValue(newQuestionRating.mu, 0, 10),
       sigma: clampValue(newQuestionRating.sigma, 0, 3.33)
-    }, { transaction: t });
-
-    // Record the answer in UserQuestionHistory
+    }, { transaction: t });    // Record the answer in UserQuestionHistory
     await UserQuestionHistory.create({
       userId: user.id,
       questionId: question.id,
       correct,
       selectedOption,
+      testId: testId || null, // Associate with a test if testId is provided
       userRatingBefore: userRating.mu,
       userRatingAfter: newMu,
       questionRatingBefore: questionRating.mu,

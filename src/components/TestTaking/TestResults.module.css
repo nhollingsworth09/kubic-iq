@@ -1,0 +1,310 @@
+.resultsContainer {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.resultsHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.resultsHeader h1 {
+  font-size: 2rem;
+  color: #324262;
+  margin-bottom: 0.5rem;
+}
+
+.resultsHeader h2 {
+  font-size: 1.25rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.resultsSummary {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 250px;
+  text-align: center;
+}
+
+.statCard h3 {
+  color: #4a5568;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #324262;
+  margin-bottom: 0.5rem;
+}
+
+.statSubtitle {
+  font-size: 0.875rem;
+  color: #718096;
+}
+
+.timeAnalysis {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.timeAnalysis h2 {
+  font-size: 1.25rem;
+  color: #324262;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.timeStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.timeStat {
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.timeStat h3 {
+  font-size: 0.875rem;
+  color: #4a5568;
+  margin-bottom: 0.5rem;
+}
+
+.timeStat p {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #324262;
+}
+
+.questionTimeStat {
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.questionTimeStat h3 {
+  font-size: 0.875rem;
+  color: #4a5568;
+  margin-bottom: 0.5rem;
+}
+
+.timeValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #324262;
+  margin-bottom: 0.5rem;
+}
+
+.questionTimeInfo {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.5rem;
+}
+
+.questionNumber {
+  font-weight: 600;
+  color: #324262;
+  margin-bottom: 0.25rem;
+}
+
+.questionText {
+  font-size: 0.875rem;
+  color: #4a5568;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeTrackingTable {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.timeTrackingTable h2 {
+  font-size: 1.25rem;
+  color: #324262;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.tableInstructions {
+  font-size: 0.875rem;
+  color: #718096;
+  margin-bottom: 1.5rem;
+}
+
+.questionTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.questionTable th {
+  text-align: left;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  color: #4a5568;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.questionTable td {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.questionTable tr:last-child td {
+  border-bottom: none;
+}
+
+.markedQuestion {
+  background-color: #fffbeb;
+}
+
+.correct {
+  color: #38b2ac;
+  font-weight: 600;
+}
+
+.incorrect {
+  color: #fc8181;
+  font-weight: 600;
+}
+
+.unanswered {
+  color: #a0aec0;
+  font-weight: 600;
+}
+
+.clickableRow {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.clickableRow:hover {
+  background-color: #f7fafc;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.primaryButton {
+  background: #324262;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.primaryButton:hover {
+  background: #253048;
+}
+
+.secondaryButton {
+  background: white;
+  border: 1px solid #324262;
+  color: #324262;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.secondaryButton:hover {
+  background: rgba(50, 66, 98, 0.1);
+}
+
+.performanceSummary {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+.performanceStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: #4a5568;
+  margin-bottom: 0.5rem;
+}
+
+.statBadge {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: white;
+}
+
+.statBadge[data-type="correct"] {
+  background-color: #38b2ac;
+}
+
+.statBadge[data-type="incorrect"] {
+  background-color: #fc8181;
+}
+
+.statBadge[data-type="unanswered"] {
+  background-color: #a0aec0;
+}
+
+.masteryBefore {
+  color: #4a5568;
+}
+
+.masteryArrow {
+  margin: 0 0.5rem;
+  color: #4a5568;
+}
+
+.masteryAfter {
+  color: #38b2ac;
+  font-weight: 700;
+}
+
+.masteryChange {
+  color: #38b2ac; /* Green/teal for positive changes */
+  font-weight: 600;
+}
+
+.negativeChange {
+  color: #fc8181 !important; /* Red for negative changes, with important to override other styles */
+}

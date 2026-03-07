@@ -1,29 +1,69 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './MasteryDashboard.module.css';
+import TestHistoryList from './TestHistory/TestHistoryList';
 
 // Minimum number of answers needed to show mastery score
 const MIN_ANSWERS = 25;
+
+// Topics available for quizzes and exams
+const topics = [
+  { topic: 'Algebra', subtopics: ['Linear equations in one variable', 'Linear equations in two variables', 'Systems of linear equations', 'Linear inequalities', 'Interpreting linear functions'] },
+  { topic: 'Advanced Math', subtopics: ['Quadratic equations', 'Rational expressions', 'Radical expressions', 'Exponential functions', 'Polynomial expressions', 'Function notation and transformations'] },
+  { topic: 'Problem Solving & Data Analysis', subtopics: ['Ratios and proportions', 'Percentages', 'Unit conversions', 'Data interpretation (tables, graphs)', 'Statistics', 'Probability'] },
+  { topic: 'Geometry & Trigonometry', subtopics: ['Angles and triangles', 'Circles', 'Coordinate geometry', 'Volume and surface area', 'Trigonometric functions and identities'] }
+];
+
+interface Test {
+  id: string;
+  testType: 'quiz' | 'custom' | 'exam';
+  questionCount: number;
+  correctCount: number;
+  percentage: number;
+  duration: number;
+  topics: string[];
+  createdAt: string;
+}
 
 interface UserProgress {
   responseCount: number;
   masteryScore: number | null;
   requiredAnswers?: number;
+  recentTests?: Test[];
 }
 
 export const MasteryDashboard = () => {
+  const navigate = useNavigate();
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'practice' | 'learn'>('practice');
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   
+  // Question popup state
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [selectedPracticeType, setSelectedPracticeType] = useState<'quiz' | 'custom' | 'exam' | ''>('');
+  const [checkedSubtopics, setCheckedSubtopics] = useState<string[]>([]);
+  const [numQuestions, setNumQuestions] = useState<number>(10);
+  const [showStartingMessage, setShowStartingMessage] = useState<boolean>(false);
+    // Create a ref to track if we need to refresh data
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Function to trigger a refresh of dashboard data
+  const refreshDashboard = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   useEffect(() => {
     // Fetch user progress from backend
     const fetchUserProgress = async () => {
       try {
+        setLoading(true);
         const response = await fetch('/api/user/progress', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+          },
+          // Add cache-busting parameter to prevent stale data
+          cache: 'no-store'
         });
         
         if (response.ok) {
@@ -40,15 +80,97 @@ export const MasteryDashboard = () => {
     };
     
     fetchUserProgress();
-  }, []);
 
+    // Listen for custom event when test is completed
+    const handleTestCompleted = () => refreshDashboard();
+    window.addEventListener('test-completed', handleTestCompleted);
+    
+    return () => {
+      window.removeEventListener('test-completed', handleTestCompleted);
+    };
+  }, [refreshTrigger]);
   const handleLogout = () => {
     localStorage.removeItem('token');
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
+    setMenuOpen(!menuOpen);  };
+
+  // Question popup functions
+  const openPracticeModal = (type: 'quiz' | 'custom' | 'exam') => {
+    setSelectedPracticeType(type);
+    setShowModal(true);
+    
+    // For mock exam, we always use all topics 
+    // and don't show the selection UI
+    if (type === 'exam') {
+      setCheckedSubtopics(allSubs);
+    } else {
+      // For custom quiz and custom exam, we start with no topics selected
+      setCheckedSubtopics([]);
+      // Reset the number of questions to default for quiz
+      if (type === 'quiz') {
+        setNumQuestions(10);
+      }
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setCheckedSubtopics([]);
+    setNumQuestions(10);
+  };
+
+  const toggleSubtopic = (sub: string) => {
+    setCheckedSubtopics(prev =>
+      prev.includes(sub) ? prev.filter(s => s !== sub) : [...prev, sub]
+    );
+  };
+
+  const toggleTopic = (subtopics: string[]) => {
+    const allIn = subtopics.every(s => checkedSubtopics.includes(s));
+    setCheckedSubtopics(prev =>
+      allIn ? prev.filter(s => !subtopics.includes(s)) : [...prev, ...subtopics.filter(s => !prev.includes(s))]
+    );
+  };
+
+  const allSubs = topics.flatMap(t => t.subtopics);
+  const allSelected = allSubs.length > 0 && allSubs.every(sub => checkedSubtopics.includes(sub));
+  const selectAll = () => setCheckedSubtopics(allSubs);
+  const deselectAll = () => setCheckedSubtopics([]);
+    const startPractice = () => {
+    const practiceTypeLabel = 
+      selectedPracticeType === 'quiz' ? 'Custom Quiz' : 
+      selectedPracticeType === 'custom' ? 'Custom Exam' : 'Mock Exam';
+    
+    // For exams, we always use 44 questions
+    const questionCount = selectedPracticeType === 'quiz' ? numQuestions : 44;
+    
+    // For mock exams, we use all topics regardless of selection
+    const topicsToUse = selectedPracticeType === 'exam' ? allSubs : checkedSubtopics;
+    
+    // Save quiz configuration to localStorage for the test starter to use
+    const quizConfig = {
+      type: selectedPracticeType,
+      topics: topicsToUse,
+      numQuestions: questionCount,
+      timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('lastQuizConfig', JSON.stringify(quizConfig));
+    
+    console.log(`Starting ${practiceTypeLabel} with ${topicsToUse.length} selected topics and ${questionCount} questions`);    // Show a toast/notification and navigate to test starter
+    setShowStartingMessage(true);
+    setTimeout(() => {
+      setShowStartingMessage(false);
+      // Navigate to test starter using React Router's navigate function
+      // This ensures we stay within the SPA and maintain auth state
+      navigate(`/test/start/${selectedPracticeType}`);
+    }, 1500);
+    
+    // Close the modal after starting
+    closeModal();
   };
 
   const resources = [
@@ -57,14 +179,23 @@ export const MasteryDashboard = () => {
     { title: 'Knowing You\'re Ready', icon: 'ready'}
   ];
 
+  // Updated to include practice types
   const practiceOptions = [
-    { title: 'Build a Custom Quiz', icon: 'pen' },
-    { title: 'Build a Custom Exam', icon: 'pen' },
-    { title: 'Take a Mock Exam', icon: 'pen'}
+    { title: 'Build a Custom Quiz', icon: 'pen', type: 'quiz' as const },
+    { title: 'Build a Custom Exam', icon: 'pen', type: 'custom' as const },
+    { title: 'Take a Mock Exam', icon: 'pen', type: 'exam' as const}
   ];
 
   const isMasteryUnlocked = userProgress && userProgress.responseCount >= MIN_ANSWERS;
   const remainingQuestions = MIN_ANSWERS - (userProgress?.responseCount || 0);
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <h2>Loading your dashboard...</h2>
+      </div>
+    );
+  }
   
   return (
     <div className={styles.dashboardContainer}>
@@ -136,7 +267,7 @@ export const MasteryDashboard = () => {
               <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                 <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
               </svg>
-              <span>Practice</span>
+              <span><b>Practice</b></span>
             </button>
             <button 
               className={`${styles.pageTab} ${activeTab === 'learn' ? styles.pageTabActive : ''}`}
@@ -146,7 +277,7 @@ export const MasteryDashboard = () => {
               <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                 <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
               </svg>
-              <span>Learn</span>
+              <span><b>Question History</b></span>
             </button>
           </div>
           <div className={styles.masteryBadge}>
@@ -175,6 +306,7 @@ export const MasteryDashboard = () => {
                 <p>
                   To get started, you'll need to answer {MIN_ANSWERS} questions. This is the first step towards
                   getting you ready for your exam, and will allow us to accurately set your Mastery Score.
+                  <br /><br />
                   <button className={styles.infoLink}>What is Mastery Score?</button>
                 </p>
                 {userProgress && (
@@ -189,21 +321,18 @@ export const MasteryDashboard = () => {
                     </p>
                   </div>
                 )}
-              </>
-            ) : (
-              <>
-                <h2>Your Mastery Score: {userProgress?.masteryScore?.toFixed(1)}</h2>
-                <p>
-                  Continue practicing to improve your mastery score. We'll adjust your 
-                  score based on the difficulty of questions you answer correctly.
-                </p>
-              </>
+              </>            ) : (
+              // When mastery score is unlocked, show test history instead of intro
+              <TestHistoryList tests={userProgress?.recentTests || []} />
             )}
-            <button className={styles.btnPrimary}>
+            <button 
+              className={styles.btnPrimary} 
+              onClick={() => openPracticeModal('exam')}
+            >
               <svg className={styles.buttonIcon} viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
               </svg>
-              <span style={{marginLeft: "0.5rem"}}>Take a Quiz</span>
+              <span style={{marginLeft: "0.5rem"}}>Take a Mock Exam</span>
             </button>
           </div>
 
@@ -227,10 +356,18 @@ export const MasteryDashboard = () => {
                 </span>
               )}
             </div>
-            
-            <p>
-              <strong>{userProgress?.responseCount || 0}/{MIN_ANSWERS}</strong><br />
-              {!isMasteryUnlocked ? 'Unlock Mastery Score by Answering 25 Questions' : 'Mastery Score Unlocked'}
+              <p>
+              {!isMasteryUnlocked ? (
+                <>
+                  <strong>{userProgress?.responseCount || 0}/{MIN_ANSWERS}</strong><br />
+                  Unlock Mastery Score by Answering 25 Questions
+                </>
+              ) : (
+                <>
+                  <strong>Keep practicing!</strong><br />
+                  Regular practice will help you build mastery and confidence
+                </>
+              )}
             </p>
           </div>
 
@@ -241,7 +378,11 @@ export const MasteryDashboard = () => {
               <h3>More Ways to Practice</h3>
               <div className={styles.buttonGroup}>
                 {practiceOptions.map((option, index) => (
-                  <button key={index} className={styles.btnOutline}>
+                  <button 
+                    key={index} 
+                    className={styles.btnOutline}
+                    onClick={() => openPracticeModal(option.type)}
+                  >
                     <svg className={styles.buttonIcon} viewBox="0 0 24 24" fill="currentColor">
                       <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                     </svg>
@@ -273,7 +414,114 @@ export const MasteryDashboard = () => {
             </div>
           </div>
         </section>
-      </div>
+      </div>      {/* Question Selection Modal */}
+      {showModal && (
+        <div className={styles.questionModalOverlay}>
+          <div className={styles.questionModalContent} onClick={(e) => e.stopPropagation()}>
+            <h2>
+              {selectedPracticeType === 'quiz' ? 'Build a Custom Quiz' : 
+               selectedPracticeType === 'custom' ? 'Build a Custom Exam' : 'Take a Mock Exam'}
+            </h2>
+            
+            {selectedPracticeType === 'exam' ? (
+              <div className={styles.examDescription}>
+                <p>
+                  The Mock Exam consists of 44 questions covering all topics.
+                  This simulates the actual test experience and will help you prepare for the real exam.
+                </p>
+              </div>
+            ) : (
+              <div className={styles.modalActions}>
+                {allSelected ? (
+                  <button className={styles.toggleBtn} onClick={deselectAll}>Deselect All</button>
+                ) : (
+                  <button className={styles.toggleBtn} onClick={selectAll}>Select All</button>
+                )}
+              </div>
+            )}            {selectedPracticeType !== 'exam' && (
+              <div className={styles.topicList}>
+                {topics.map(({ topic, subtopics }) => (
+                  <div key={topic} className={styles.topicGroup}>
+                    <label className={styles.topicLabel}>
+                      <input
+                        type="checkbox"
+                        checked={subtopics.every((s) => checkedSubtopics.includes(s))}
+                        onChange={() => toggleTopic(subtopics)}
+                        className={styles.topicCheckbox}
+                      />
+                      <strong>{topic}</strong>
+                    </label>
+                    <ul className={styles.subtopicList}>
+                      {subtopics.map((s) => (
+                        <li key={s}>
+                          <label className={styles.subtopicLabel}>
+                            <input
+                              type="checkbox"
+                              checked={checkedSubtopics.includes(s)}
+                              onChange={() => toggleSubtopic(s)}
+                              className={styles.subtopicCheckbox}
+                            />
+                            {s}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}            {/* Only show number selector for custom quiz */}
+            {selectedPracticeType === 'quiz' && (
+              <div className={styles.sliderSection}>
+                <label htmlFor="questionSlider">Number of Questions: {numQuestions}</label>
+                <input
+                  type="range"
+                  id="questionSlider"
+                  min="1"
+                  max="30"
+                  value={numQuestions}
+                  onChange={(e) => setNumQuestions(Number(e.target.value))}
+                  className={styles.slider}
+                />
+              </div>
+            )}
+
+            {/* For Custom Exam, show a note about question count */}
+            {selectedPracticeType === 'custom' && (
+              <div className={styles.examNote}>
+                Custom exams consist of 44 questions from your selected topics
+              </div>
+            )}
+
+            <div className={styles.modalFooter}>
+              <button className={styles.cancelBtn} onClick={closeModal}>Cancel</button>
+              <button 
+                className={styles.startBtn} 
+                onClick={startPractice}
+                disabled={selectedPracticeType !== 'exam' && checkedSubtopics.length === 0}
+              >
+                Start {selectedPracticeType === 'quiz' ? 'Quiz' : 'Exam'}
+              </button>
+            </div>
+            
+            {selectedPracticeType !== 'exam' && checkedSubtopics.length === 0 && (
+              <div className={styles.topicWarning}>
+                Please select at least one topic to continue
+              </div>
+            )}
+          </div>
+        </div>
+      )}      {/* Toast Notification for Starting Practice */}
+      {showStartingMessage && (
+        <div className={`${styles.toast} ${styles.toastInfo}`}>
+          <div className={styles.toastContent}>
+            <div className={styles.spinnerSmall}></div>
+            <span>Starting {
+              selectedPracticeType === 'quiz' ? 'Custom Quiz' : 
+              selectedPracticeType === 'custom' ? 'Custom Exam' : 'Mock Exam'
+            }...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

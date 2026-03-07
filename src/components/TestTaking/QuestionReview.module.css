@@ -1,0 +1,103 @@
+.reviewContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.reviewHeader h2 {
+  font-size: 1.5rem;
+  color: #324262;
+  margin: 0;
+}
+
+.resultBadge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.resultBadge[data-correct="true"] {
+  background-color: rgba(56, 178, 172, 0.2);
+  color: #2c7a7b;
+}
+
+.resultBadge[data-correct="false"] {
+  background-color: rgba(245, 101, 101, 0.2);
+  color: #c53030;
+}
+
+.reviewContent {
+  margin-bottom: 2rem;
+}
+
+/* Style for correct option */
+.correctOption {
+  border-color: #38b2ac !important;
+  background-color: rgba(56, 178, 172, 0.1) !important;
+}
+
+/* Style for incorrect selection */
+.incorrectSelection {
+  border-color: #fc8181 !important;
+  background-color: rgba(252, 129, 129, 0.1) !important;
+}
+
+.correctIcon {
+  width: 2rem;
+  height: 2rem;
+  background-color: #38b2ac;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+/* Student Produced Response Styling */
+.studentResponse {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.responseSection h3 {
+  font-size: 1rem;
+  color: #4a5568;
+  margin-bottom: 0.75rem;
+}
+
+.answerBox {
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  min-height: 3rem;
+  background-color: #f8fafc;
+}
+
+.correctAnswer {
+  border-color: #38b2ac;
+  background-color: rgba(56, 178, 172, 0.1);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .studentResponse {
+    grid-template-columns: 1fr;
+  }
+}

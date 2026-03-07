@@ -8,6 +8,7 @@ const sequelize = new Sequelize({
 
 const Question = require('./question')(sequelize);
 const UserQuestionHistory = require('./userQuestionHistory')(sequelize);
+const TestHistory = require('./testHistory')(sequelize);
 
 // Define associations
 Question.hasMany(UserQuestionHistory, {
@@ -22,5 +23,6 @@ UserQuestionHistory.belongsTo(Question, {
 module.exports = {
   sequelize,
   Question,
-  UserQuestionHistory
+  UserQuestionHistory,
+  TestHistory
 };

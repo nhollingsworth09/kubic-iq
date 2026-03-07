@@ -14,7 +14,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --coverage --watchAll=false",
     "test:watch": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "migrate-test-history": "node server/scripts/migrateTestHistory.js"
   },
   "jest": {
     "collectCoverageFrom": [

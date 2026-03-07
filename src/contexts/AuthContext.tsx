@@ -25,18 +25,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     // Check for existing session
     const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+      
       try {
-        const response = await fetch('/api/auth/session');
+        const response = await fetch('/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
+        } else {
+          // Invalid or expired token
+          localStorage.removeItem('token');
         }
       } catch (err) {
         console.error('Auth check failed:', err);
+        localStorage.removeItem('token');
       } finally {
         setIsLoading(false);
       }
@@ -44,40 +58,45 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     checkAuth();
   }, []);
-
   const login = async (email: string, password: string) => {
     setError(null);
     setIsLoading(true);
 
     try {
+      console.log('Attempting login with:', { email });
+      
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Invalid credentials');
+        console.error('Login failed:', data);
+        throw new Error(data.message || 'Invalid credentials');
       }
 
-      const userData = await response.json();
-      setUser(userData);
+      console.log('Login successful, saving token');
+      // Save the token to localStorage for later use
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+      
+      setUser(data.user);
     } catch (err) {
+      console.error('Login error:', err);
       setError(err instanceof Error ? err.message : 'Login failed');
       throw err;
     } finally {
       setIsLoading(false);
     }
   };
-
-  const logout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-    } catch (err) {
-      console.error('Logout failed:', err);
-    } finally {
-      setUser(null);
-    }
+  const logout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    setError(null);
   };
 
   return (
