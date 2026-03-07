@@ -69,22 +69,54 @@ Questions are stored in a **SQLite** database (via Sequelize ORM) at `server/db/
 |-------|------|-------------|
 | `id` | UUID | Primary key |
 | `text` | TEXT | Question body |
-| `options` | JSON array | Answer choices (multiple-choice); empty for student-produced |
-| `correctAnswer` | STRING | Index (0-based) for multiple-choice, or exact string for student-produced |
+| `options` | JSON array | Answer choices (multiple-choice); empty `[]` for student-produced |
+| `correctAnswer` | STRING | 0-based index string for multiple-choice (e.g. `"2"`), or exact answer string for student-produced (e.g. `"13"`) |
 | `questionType` | STRING | `"multiple-choice"` or `"student-produced"` |
 | `mu` | FLOAT | TrueSkill difficulty mean (0–10, default 5.0) |
 | `sigma` | FLOAT | TrueSkill difficulty uncertainty (0–3.33, default 1.67) |
-| `tags` | JSON array | Topic tags used for adaptive filtering (e.g. `["algebra", "linear-equations"]`) |
+| `tags` | JSON array | Topic tags used for adaptive filtering (e.g. `["Algebra", "Linear equations in two variables"]`) |
+
+## Question Types
+
+### Multiple-Choice (`"multiple-choice"`)
+Presents four answer options stored in the `options` array. `correctAnswer` is the **0-based index** of the correct option as a string (e.g. `"0"` = first option, `"2"` = third option).
+
+Graded by comparing the student's selected option index against `Number(correctAnswer)`.
+
+### Student-Produced Response (`"student-produced"`)
+No answer options — `options` is an empty array `[]`. The student types a numeric answer freely. `correctAnswer` is the **exact expected string** (e.g. `"120"`, `"3"`).
+
+Graded by case-insensitive string comparison of the student's trimmed input against `correctAnswer`.
+
+**Relevant source files for question types:**
+
+| File | Purpose |
+|------|---------|
+| [server/models/question.js](server/models/question.js) | Sequelize model — defines `questionType`, `options`, `correctAnswer` fields |
+| [src/contexts/TestContext.tsx](src/contexts/TestContext.tsx) | Frontend grading logic in `evalAnswers()` — handles both types |
+| [server/routes/questions.js](server/routes/questions.js) | `GET /api/questions/random` — serves questions to the frontend |
+
+## Initial Question Bank (44 Questions)
+
+The seed database ships with **44 SAT-style questions** spanning the four major SAT math domains:
+
+| Domain | Example Topics |
+|--------|---------------|
+| **Algebra** | Linear equations, systems of equations, inequalities |
+| **Advanced Math** | Quadratic equations, polynomial expressions, function notation |
+| **Problem Solving & Data Analysis** | Statistics, averages, percentages, probability |
+| **Geometry & Trigonometry** | Similar triangles, area & perimeter, coordinate geometry |
+
+The 44 questions include a mix of multiple-choice and student-produced response types, each pre-assigned a `mu`/`sigma` difficulty rating based on estimated SAT difficulty level.
 
 **Relevant source files:**
 
 | File | Purpose |
 |------|---------|
-| [server/models/question.js](server/models/question.js) | Sequelize model definition |
+| [server/scripts/sampleQuestions.js](server/scripts/sampleQuestions.js) | The full 44-question seed dataset |
+| [server/scripts/initializeDatabase.js](server/scripts/initializeDatabase.js) | Seeds the database with `sampleQuestions.js` on first run |
+| [server/scripts/generateAdditionalQuestions.js](server/scripts/generateAdditionalQuestions.js) | Script to generate additional questions beyond the seed set |
 | [server/questions.js](server/questions.js) | Admin CRUD API (`GET/POST/PUT/DELETE /api/admin/questions`) |
-| [server/routes/questions.js](server/routes/questions.js) | Student-facing questions API (`GET /api/questions/random`) |
-| [server/scripts/sampleQuestions.js](server/scripts/sampleQuestions.js) | Seed data — SAT-style sample questions |
-| [server/scripts/initializeDatabase.js](server/scripts/initializeDatabase.js) | Seeds questions + default accounts on first run |
 
 To reset and re-seed the question database:
 
@@ -93,7 +125,7 @@ cd server
 node scripts/initializeDatabase.js
 ```
 
-> Warning: this uses `sequelize.sync({ force: true })` and will **drop all existing data**.
+> **Warning:** this uses `sequelize.sync({ force: true })` and will **drop all existing data**.
 
 ---
 # 📁 Project Structure
