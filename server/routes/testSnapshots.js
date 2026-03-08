@@ -1,6 +1,7 @@
 const express = require('express');
 const { TestHistory } = require('../models');
 const { User, authMiddleware } = require('../auth');
+const { Rating, rate_1vs1 } = require('ts-trueskill');
 const router = express.Router();
 
 // TrueSkill configuration — must match answer.js
@@ -39,11 +40,51 @@ router.post('/', authMiddleware, async (req, res) => {
     // Snapshot the user's mastery score before this test
     const masteryScoreBefore = user.responseCount >= MIN_ANSWERS ? user.masteryScore : null;
 
-    // μ/σ/responseCount are already current — answer.js updated them per-question during the test.
-    // Re-applying TrueSkill here would double-count every answer.
-    const newMu = user.trueskill_mu;
-    const newSigma = user.trueskill_sigma;
-    const newResponseCount = user.responseCount;
+    // Apply TrueSkill updates for each answered question in the snapshot.
+    // answer.js is not called in the snapshot-based quiz flow, so all
+    // mu/sigma/responseCount updates must happen here at submission.
+    let mu = clampValue(user.trueskill_mu || MU0, 0, 10);
+    let sigma = clampValue(user.trueskill_sigma || SIGMA0, 0, 3.33);
+    let responseCount = user.responseCount || 0;
+
+    if (snapshot && snapshot.questions && snapshot.answers) {
+      const questionMap = {};
+      for (const q of snapshot.questions) {
+        questionMap[q.id] = q;
+      }
+
+      const answeredItems = snapshot.answers.filter(
+        a => a.isCorrect !== undefined && a.isCorrect !== null
+      );
+
+      for (const answer of answeredItems) {
+        const question = questionMap[answer.questionId];
+        if (!question) continue;
+
+        const userRating = new Rating(mu, sigma, BETA, TAU);
+        const questionRating = new Rating(
+          clampValue(question.mu || MU0, 0, 10),
+          clampValue(question.sigma || SIGMA0, 0, 3.33),
+          BETA,
+          TAU
+        );
+
+        let newUserRating;
+        if (answer.isCorrect) {
+          [newUserRating] = rate_1vs1(userRating, questionRating);
+        } else {
+          [, newUserRating] = rate_1vs1(questionRating, userRating);
+        }
+
+        mu = clampValue(newUserRating.mu, 0, 10);
+        sigma = clampValue(newUserRating.sigma, 0, 3.33);
+        responseCount++;
+      }
+    }
+
+    const newMu = mu;
+    const newSigma = sigma;
+    const newResponseCount = responseCount;
 
     // Compute new mastery score (only surfaced once MIN_ANSWERS threshold is met)
     const rawMastery = clampValue(newMu - K * newSigma, 0, 10);
@@ -71,11 +112,13 @@ router.post('/', authMiddleware, async (req, res) => {
       schemaVersion: 1
     });
 
-    // Only masteryScore needs persisting — trueskill_mu, trueskill_sigma, and responseCount
-    // are already up-to-date from per-answer updates in answer.js.
-    if (masteryScoreAfter !== null) {
-      await user.update({ masteryScore: masteryScoreAfter });
-    }
+    // Persist updated TrueSkill params, responseCount, and masteryScore.
+    await user.update({
+      trueskill_mu: newMu,
+      trueskill_sigma: newSigma,
+      responseCount: newResponseCount,
+      ...(masteryScoreAfter !== null && { masteryScore: masteryScoreAfter })
+    });
 
     console.log(`Created test snapshot with ID: ${testHistory.id}, masteryScoreAfter: ${masteryScoreAfter}`);
 
