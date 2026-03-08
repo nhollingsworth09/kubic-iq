@@ -22,6 +22,12 @@
   margin: 0;
 }
 
+.headerBadges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .resultBadge {
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -35,6 +41,28 @@
 }
 
 .resultBadge[data-correct="false"] {
+  background-color: rgba(245, 101, 101, 0.2);
+  color: #c53030;
+}
+
+.difficultyBadge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.difficultyBadge[data-difficulty="easy"] {
+  background-color: rgba(72, 187, 120, 0.2);
+  color: #276749;
+}
+
+.difficultyBadge[data-difficulty="medium"] {
+  background-color: rgba(237, 137, 54, 0.2);
+  color: #9c4221;
+}
+
+.difficultyBadge[data-difficulty="hard"] {
   background-color: rgba(245, 101, 101, 0.2);
   color: #c53030;
 }

@@ -32,7 +32,7 @@ async function createAdminUser() {
         password: hashedPassword,
         displayName: 'Admin User',
         isAdmin: true,
-        trueskill_mu: 5.0,
+        trueskill_mu: 7.0,
         trueskill_sigma: 1.67,
         responseCount: 30  // Set above MIN_ANSWERS to have a visible masteryScore
       });

@@ -373,32 +373,6 @@ export const TestProvider: React.FC<TestProviderProps> = ({ children }) => {
         // Extract topics from questions
         const topics = Array.from(new Set(questions.flatMap(q => q.tags))); 
         
-        // Get user data to calculate mastery score changes
-        const userResponse = await fetch('/api/user/progress', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (!userResponse.ok) {
-          throw new Error('Failed to fetch user data');
-        }
-        
-        const userData = await userResponse.json();
-        
-        // Calculate mastery score impact
-        const masteryScoreBefore = userData.masteryScore || null;
-        // Use our formula
-        const masteryScoreChange = masteryScoreBefore !== null ? 
-          (correctCount / questions.length - 0.5) * 0.2 : null;
-        const masteryScoreAfter = masteryScoreBefore !== null ?
-          Math.min(10, Math.max(0, masteryScoreBefore + masteryScoreChange)) : null;
-        
-        // Update context state with mastery scores
-        setMasteryScoreBefore(masteryScoreBefore);
-        setMasteryScoreChange(masteryScoreChange);
-        setMasteryScoreAfter(masteryScoreAfter);
-        
         // Create a complete test snapshot
         const testSnapshot = {
           questions: questions.map(q => ({
@@ -424,7 +398,8 @@ export const TestProvider: React.FC<TestProviderProps> = ({ children }) => {
           testDuration: duration
         };
             
-        // Submit complete test snapshot to backend
+        // Submit complete test snapshot to backend.
+        // Mastery score is computed server-side using TrueSkill — no client formula needed.
         const response = await fetch('/api/test-snapshots', {
           method: 'POST',
           headers: {
@@ -437,9 +412,6 @@ export const TestProvider: React.FC<TestProviderProps> = ({ children }) => {
             correctCount,
             duration,
             topics,
-            masteryScoreChange,
-            masteryScoreBefore,
-            masteryScoreAfter,
             snapshot: testSnapshot
           })
         });
@@ -450,6 +422,15 @@ export const TestProvider: React.FC<TestProviderProps> = ({ children }) => {
         
         const testResult = await response.json();
         const savedTestId = testResult.testId;
+
+        // Use mastery values returned by the server (TrueSkill μ - 3σ)
+        const serverMasteryBefore = testResult.masteryScoreBefore ?? null;
+        const serverMasteryAfter = testResult.masteryScoreAfter ?? null;
+        const serverMasteryChange = testResult.masteryScoreChange ?? null;
+
+        setMasteryScoreBefore(serverMasteryBefore);
+        setMasteryScoreAfter(serverMasteryAfter);
+        setMasteryScoreChange(serverMasteryChange);
         
         if (savedTestId) {
           // Store the test ID in the context state
@@ -460,9 +441,9 @@ export const TestProvider: React.FC<TestProviderProps> = ({ children }) => {
             sessionStorage.setItem(`test_${savedTestId}`, JSON.stringify({
               testId: savedTestId,
               snapshot: testSnapshot,
-              masteryScoreBefore,
-              masteryScoreAfter,
-              masteryScoreChange,
+              masteryScoreBefore: serverMasteryBefore,
+              masteryScoreAfter: serverMasteryAfter,
+              masteryScoreChange: serverMasteryChange,
               testType,
               createdAt: new Date().toISOString()
             }));

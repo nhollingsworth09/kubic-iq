@@ -13,7 +13,13 @@ async function createTestUser() {
     const existingUser = await User.findOne({ where: { email: 'test@example.com' } });
     
     if (existingUser) {
-      console.log('Test user already exists.');
+      await existingUser.update({
+        trueskill_mu: 7.0,
+        trueskill_sigma: 1.0, // 7.0 - 2*1.0 = 5.0 — consistent with K=2 formula
+        masteryScore: 5.0,
+        responseCount: 30
+      });
+      console.log('Test user already exists. TrueSkill params and mastery score reset.');
     } else {
       // Create the test user
       const hashedPassword = await bcrypt.hash('password123', 10);
@@ -22,6 +28,8 @@ async function createTestUser() {
         displayName: 'Test User',
         email: 'test@example.com',
         password: hashedPassword,
+        trueskill_mu: 7.0,
+        trueskill_sigma: 1.0, // 7.0 - 2*1.0 = 5.0 — consistent with K=2 formula
         responseCount: 30,
         masteryScore: 5.0
       });

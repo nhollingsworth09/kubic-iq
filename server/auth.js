@@ -27,7 +27,7 @@ const User = sequelize.define('User', {
     allowNull: false
   },  trueskill_mu: {
     type: DataTypes.FLOAT,
-    defaultValue: 5.0, // Default TrueSkill mean (scaled to 0-10)
+    defaultValue: 7.0, // Optimistic prior — SAT prep students skew above mid-scale
     validate: {
       min: 0,
       max: 10

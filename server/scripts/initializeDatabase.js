@@ -59,7 +59,7 @@ async function initializeDatabase() {
       password: hashedPassword,
       displayName: 'Admin User',
       isAdmin: true,
-      trueskill_mu: 5.0,
+      trueskill_mu: 7.0,
       trueskill_sigma: 1.67,
       masteryScore: 5.0,
       responseCount: 30 // Set above 25 to show mastery score
@@ -76,7 +76,7 @@ async function initializeDatabase() {
       password: hashedTestPassword,
       displayName: 'Test User',
       isAdmin: false,
-      trueskill_mu: 5.0,
+      trueskill_mu: 7.0,
       trueskill_sigma: 1.67,
       masteryScore: 5.0,
       responseCount: 30

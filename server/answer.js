@@ -7,12 +7,15 @@ const router = express.Router();
 const Op = Sequelize.Op;
 
 // TrueSkill configuration
-const MU0 = 5;
+const MU0 = 7.0;        // Optimistic prior — SAT prep students skew above mid-scale
 const SIGMA0 = 1.67;
-const BETA = 1;       // performance variance
-const TAU = 0.033;    // dynamics
-const K = 3;         // conservativeness factor for mastery score
-const MIN_ANSWERS = 25; // Minimum number of answers required to show mastery score
+const BETA = 1;         // performance variance
+const TAU = 0.033;      // dynamics
+const K = 2;            // conservativeness factor: masteryScore = μ - K*σ (95% CI)
+const MIN_ANSWERS = 25; // Minimum answers before mastery score is shown
+// A question is retired from rotation once the student's conservative skill floor
+// exceeds the question's fixed difficulty by this margin.
+const MASTERY_MARGIN = 1.0;
 
 // Helper function to clamp values
 const clampValue = (value, min, max) => Math.min(Math.max(value, min), max);
@@ -65,71 +68,58 @@ router.post('/', authMiddleware, async (req, res) => {
       TAU
     );
 
-    // Update ratings based on correctness
-    let newUserRating, newQuestionRating;
+    // Update student rating only — question difficulty is fixed.
+    // The question rating is used as a reference input to calibrate the rating
+    // update, but we intentionally do NOT save changes back to the question.
+    let newUserRating;
     if (correct) {
-      [newUserRating, newQuestionRating] = rate_1vs1(userRating, questionRating);
+      [newUserRating] = rate_1vs1(userRating, questionRating);
     } else {
-      [newQuestionRating, newUserRating] = rate_1vs1(questionRating, userRating);
-    }    // Clamp the new ratings to our 0-10 scale
+      [, newUserRating] = rate_1vs1(questionRating, userRating);
+    }
+    // Clamp the new ratings to our 0-10 scale
     const newMu = clampValue(newUserRating.mu, 0, 10);
     const newSigma = clampValue(newUserRating.sigma, 0, 3.33);
     
-    // TODO: increment response count
+    // Increment response count
     const responseCount = (user.responseCount || 0) + 1;
-    
-    // Calculate potential mastery score
-    const masteryScoreValue = clampValue(newMu - K * newSigma, 0, 10);
-    
-    // TODO: if count >= MIN_ANSWERS compute/save masteryScore
-    // TODO: else leave null
+
+    // μ/σ/responseCount are updated per-answer for adaptive question selection.
+    // masteryScore is only computed and persisted at test submission (testSnapshots.js).
     const updatedUserData = {
       trueskill_mu: newMu,
       trueskill_sigma: newSigma,
       responseCount
     };
-    
-    if (responseCount >= MIN_ANSWERS) {
-      updatedUserData.masteryScore = masteryScoreValue;
-    }
-    
-    // Update user's ratings, response count, and conditionally update mastery score
+
+    // Update user's ratings and response count
     await user.update(updatedUserData, { transaction: t });
 
-    // Update question's ratings with clamped values
-    await question.update({
-      mu: clampValue(newQuestionRating.mu, 0, 10),
-      sigma: clampValue(newQuestionRating.sigma, 0, 3.33)
-    }, { transaction: t });    // Record the answer in UserQuestionHistory
+    // Record the answer in UserQuestionHistory
     await UserQuestionHistory.create({
       userId: user.id,
       questionId: question.id,
       correct,
       selectedOption,
-      testId: testId || null, // Associate with a test if testId is provided
+      testId: testId || null,
       userRatingBefore: userRating.mu,
       userRatingAfter: newMu,
-      questionRatingBefore: questionRating.mu,
-      questionRatingAfter: clampValue(newQuestionRating.mu, 0, 10)
+      questionRatingBefore: question.mu,
+      questionRatingAfter: question.mu // fixed; unchanged
     }, { transaction: t });
 
-    // Find next adaptive question within the valid difficulty range
+    // Find next adaptive question.
+    // Exclusion rule: a question is retired only when the student's conservative
+    // skill floor (newMu - newSigma - MASTERY_MARGIN) exceeds the question's
+    // fixed difficulty. Questions near or above the student's level recirculate.
+    const skillFloor = newMu - newSigma - MASTERY_MARGIN;
     const nextQuestion = await Question.findOne({
       where: {
-        id: {
-          [Op.and]: [
-            { [Op.ne]: questionId }, // Exclude current question
-            {
-              [Op.notIn]: sequelize.literal(
-                `(SELECT questionId FROM UserQuestionHistories WHERE userId = '${user.id}')`
-              )
-            }
-          ]
-        },
+        id: { [Op.ne]: questionId }, // never repeat the just-answered question immediately
         mu: {
-          [Op.between]: [
-            clampValue(newMu - 1, 0, 10), // Ensure difficulty range stays within 0-10
-            clampValue(newMu + 1, 0, 10)
+          [Op.and]: [
+            { [Op.between]: [clampValue(newMu - 1, 0, 10), clampValue(newMu + 1, 0, 10)] },
+            { [Op.gt]: skillFloor } // skip questions the student has clearly mastered
           ]
         }
       },
@@ -140,8 +130,10 @@ router.post('/', authMiddleware, async (req, res) => {
     });
 
     // Commit transaction
-    await t.commit();    // Get updated user for response
-    const updatedUser = await User.findByPk(user.id, { transaction: t });
+    await t.commit();
+
+    // Get updated user for response (fresh read after commit, no transaction)
+    const updatedUser = await User.findByPk(user.id);
     
     // Send response
     res.json({

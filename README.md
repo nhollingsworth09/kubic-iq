@@ -7,7 +7,7 @@ We’re building an SAT prep web app MVP with React (frontend) and Node.js/Expre
 
 ### What It Does
 
-Students log in and take quizzes or full-length practice exams made up of real SAT-style questions. After every answer, the system recalculates both the student's skill level and the question's difficulty using the **TrueSkill rating algorithm**. Over time, the platform builds an accurate model of each student's strengths and weaknesses, then automatically surfaces questions at the right difficulty level — not too easy, not too hard — to produce the fastest possible skill growth.
+Students log in and take quizzes or full-length practice exams made up of real SAT-style questions. After every answer, the system recalculates the student's skill level using the **TrueSkill rating algorithm**, using each question's fixed difficulty as a calibration reference. Over time, the platform builds an accurate model of each student's strengths and weaknesses, then automatically surfaces questions at the right difficulty level — not too easy, not too hard — to produce the fastest possible skill growth.
 
 ### Key Student-Facing Features
 
@@ -26,37 +26,139 @@ Students log in and take quizzes or full-length practice exams made up of real S
 
 # 🧠 TrueSkill Adaptive Engine
 
-The adaptive difficulty system is built on the **TrueSkill** Bayesian ranking algorithm (via [`ts-trueskill`](https://www.npmjs.com/package/ts-trueskill)). Each student and each question carries two values:
+The adaptive difficulty system is built on the **TrueSkill** Bayesian ranking algorithm (via [`ts-trueskill`](https://www.npmjs.com/package/ts-trueskill)). Each student and question is modelled as a Gaussian belief over skill/difficulty:
+
+$$\text{Skill} \sim \mathcal{N}(\mu, \sigma^2)$$
 
 | Symbol | Meaning |
 |--------|---------|
-| μ (mu) | Estimated skill/difficulty — higher = more skilled / harder |
-| σ (sigma) | Uncertainty — decreases as more data is collected |
+| μ (mu) | Estimated skill/difficulty mean — higher = more skilled / harder |
+| σ (sigma) | Uncertainty — decreases as evidence accumulates; never reaches zero |
 
-**After every answer**, the backend treats the interaction as a 1-vs-1 match:
-- Correct answer → student "beats" the question → student μ rises, question μ falls
-- Wrong answer → question "beats" the student → student μ falls, question μ rises
+---
 
-**Mastery Score** is derived as `μ - 3σ`, clamped to 0–10. This conservative estimate only converges to a stable number once the student has answered ≥ 25 questions.
+## Rating Update Mathematics
+
+After each answer, the backend runs a 1-vs-1 TrueSkill match between the student and the question. The update is derived from the truncated Gaussian correction of the expected outcome.
+
+### Performance variance term
+
+$$c = \sqrt{2\beta^2 + \sigma_{\text{student}}^2 + \sigma_{\text{question}}^2}$$
+
+Where `β = 1` (performance variance) controls how much randomness is assumed in any single match outcome.
+
+### Win/loss outcome variable
+
+$$t = \frac{\mu_{\text{student}} - \mu_{\text{question}}}{c}$$
+
+A positive `t` means the student is expected to win; negative means the question is harder than the student.
+
+### Truncated Gaussian correction factors
+
+$$v(t) = \frac{\phi(t)}{\Phi(t)}, \qquad w(t) = v(t)\bigl(v(t) + t\bigr)$$
+
+Where `φ` is the standard normal PDF and `Φ` is the CDF. These factors scale the update:
+- `v(t)` is the **magnitude** of the correction (how surprising the outcome was)
+- `w(t)` is the **confidence gain** (how much this outcome reduces uncertainty)
+
+When `t ≈ 0` (student and question are equally matched), `v` and `w` are maximised — the result is most informative. When the gap is large, `v` and `w` shrink — unsurprising outcomes yield little information. This is why the adaptive question selector (which targets questions near the student's current μ) accelerates calibration versus random question selection.
+
+### μ update (correct answer — student wins)
+
+$$\mu'_{\text{student}} = \mu_{\text{student}} + \frac{\sigma_{\text{student}}^2}{c} \cdot v(t)$$
+
+### μ update (wrong answer — student loses)
+
+$$\mu'_{\text{student}} = \mu_{\text{student}} - \frac{\sigma_{\text{student}}^2}{c} \cdot v(-t)$$
+
+### σ update (both outcomes)
+
+$$\sigma'^2_{\text{student}} = \sigma^2_{\text{student}} \left(1 - \frac{\sigma^2_{\text{student}}}{c^2} \cdot w(t)\right) + \tau^2$$
+
+The `+ τ²` term (dynamics factor, `τ = 0.033`) re-injects a small amount of uncertainty each round, modelling the fact that skill is not static. This prevents σ from converging to zero and ensures the system remains responsive to genuine skill changes over time.
+
+**Question μ/σ is never mutated at runtime** — the question's rating serves as a fixed calibration reference only. Mutating it would cause difficulty to drift based on individual students rather than converging on the question's true objective difficulty.
+
+---
+
+## Mastery Score Formula
+
+The displayed Mastery Score is a **conservative skill floor** — a 95% confidence lower bound on the student's true ability:
+
+$$\text{MasteryScore} = \text{clamp}(\mu - K\sigma,\ 0,\ 10), \qquad K = 2$$
+
+The choice of `K = 2` reflects a 95% confidence interval (two-sigma rule). This means the displayed score is a value the student's true skill is statistically likely to exceed. Scores of 9–10 are achievable by highly calibrated students but require both high μ and low σ.
+
+**Why not K = 3?** Three-sigma (99.7%) confidence requires a student answering difficulty-7.5 questions consistently just to display a score of 5.0. With K = 2, a well-calibrated student performing at difficulty 7.5 displays approximately 5.8–6.3 after sufficient calibration — consistent with the product expectation that a score of 6–7 represents exam readiness and 7+ correlates with a high pass probability.
+
+The score is **hidden until 25 questions answered** (`MIN_ANSWERS = 25`). With the adaptive question selector, 25 questions with close difficulty matching (question μ within ±1 of student μ) is sufficient for σ to compress to approximately 0.70, yielding a stable and meaningful first-reveal score.
+
+---
+
+## Initialization Values
+
+| Parameter | Value | Rationale |
+|-----------|-------|-----------|
+| `MU0` | **7.0** | An optimistic prior: a student investing in SAT prep is likely above the mid-scale. This primes the adaptive selector to serve moderate-to-hard questions immediately, accelerating calibration. Since the score is hidden for the first 25 questions, any downward μ correction during calibration is never shown to the student. |
+| `SIGMA0` | **1.67** | High initial uncertainty reflecting no prior evidence. Produces a displayed uncertainty range of roughly ±3.3 around μ at first reveal, which tightens to ±1.4 by ~25 questions. The wide prior is intentional: it allows μ to move quickly early on, which is desirable for fast calibration. |
+| `BETA` | 1.0 | Performance variance per match — controls how much a single answer can shift ratings. |
+| `TAU` | 0.033 | Dynamics noise — prevents σ from collapsing to zero and keeps the model responsive to genuine skill changes over extended use. |
+| `K` | 2 | Conservativeness multiplier for Mastery Score display. See formula above. |
+
+### σ convergence trajectory (adaptive questioning)
+
+With close-difficulty question matching, σ compresses faster than random selection because `w(t)` is maximised when `t ≈ 0`. Approximate values for an on-track student:
+
+| Questions answered | σ (approx) | MasteryScore at μ = 7.0 |
+|---|---|---|
+| 0–24 | — | Hidden |
+| 25 (first reveal) | ~0.70 | ~5.6 |
+| 50 | ~0.52 | ~5.96 |
+| 100 | ~0.40 | ~6.2 |
+| 200+ | ~0.30 | ~6.4 |
+
+A student whose true skill is above μ = 7.0 will see their score rise above these baselines as μ increases through calibration.
+
+---
+
+## What changes and what doesn't
+
+| Value | Changes? | Where stored |
+|-------|----------|-------------|
+| Student μ / σ | ✅ Updated per answer (`answer.js`) | `Users` table |
+| Student masteryScore | ✅ Updated at test submission only (`testSnapshots.js`) | `Users` table |
+| Question μ / σ | ❌ Fixed — never mutated at runtime | `Questions` table |
+
+**masteryScore is computed and persisted only at test submission**, not per-answer. The per-answer handler (`answer.js`) updates μ/σ for adaptive question selection during the test, but the displayed score only changes when a full test snapshot is submitted. This ensures the score reflects complete, finalized performance rather than in-progress state.
+
+### Question selection & retirement
+
+Questions are selected where `question.mu` is within ±1 of the student's current μ. A question is retired from a student's rotation when:
+
+$$\mu_{\text{student}} - \sigma_{\text{student}} - 1.0 > \mu_{\text{question}}$$
+
+Only clearly mastered questions are suppressed. Questions near or above the student's level continue to recirculate until σ tightens enough to confirm mastery.
 
 **Relevant source files:**
 
 | File | Purpose |
 |------|---------|
-| [server/answer.js](server/answer.js) | Core rating update logic — `rate_1vs1` called on every POST `/api/answer` |
+| [server/answer.js](server/answer.js) | Per-answer μ/σ update + adaptive question selection |
+| [server/routes/testSnapshots.js](server/routes/testSnapshots.js) | masteryScore computation and persistence at submission |
 | [server/auth.js](server/auth.js) | User model — stores `trueskill_mu`, `trueskill_sigma`, `masteryScore` |
-| [server/models/question.js](server/models/question.js) | Question model — stores per-question `mu` and `sigma` |
+| [server/models/question.js](server/models/question.js) | Question model — stores fixed per-question `mu` and `sigma` |
 | [server/userProgress.js](server/userProgress.js) | Returns current mastery score to the frontend |
 
 **Configuration constants** (in [server/answer.js](server/answer.js)):
 
 ```js
-const MU0    = 5;     // Starting mean for all users and questions
-const SIGMA0 = 1.67;  // Starting uncertainty
-const BETA   = 1;     // Performance variance
-const TAU    = 0.033; // Skill dynamics (allows ratings to drift over time)
-const K      = 3;     // Mastery score conservativeness: masteryScore = μ - K*σ
-const MIN_ANSWERS = 25; // Minimum answers before mastery score is shown
+const MU0          = 7.0;   // Optimistic prior — SAT prep students skew above mid-scale
+const SIGMA0       = 1.67;  // Wide initial uncertainty — enables fast early calibration
+const BETA         = 1;     // Performance variance per match
+const TAU          = 0.033; // Skill dynamics (prevents σ → 0, keeps model adaptive)
+const K            = 2;     // Mastery score formula: masteryScore = μ - K*σ (95% CI)
+const MIN_ANSWERS  = 25;    // Minimum answers before mastery score is displayed
+const MASTERY_MARGIN = 1.0; // Question retired when (μ_student - σ_student - MASTERY_MARGIN) > μ_question
 ```
 
 ---

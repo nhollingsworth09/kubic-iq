@@ -91,7 +91,7 @@ async function fixDatabaseAndCreateAdmin() {
       password: await bcrypt.hash('admin123', 10),
       displayName: 'Admin User',
       isAdmin: true,
-      trueskill_mu: 5.0,
+      trueskill_mu: 7.0,
       trueskill_sigma: 1.67,
       responseCount: 30, // Set above threshold to show mastery score
       masteryScore: 5.0
@@ -105,7 +105,8 @@ async function fixDatabaseAndCreateAdmin() {
       await existingAdmin.update({
         password: adminUser.password,
         isAdmin: true,
-        responseCount: 30
+        responseCount: 30,
+        masteryScore: 5.0
       });
       console.log('Admin user updated');
     } else {

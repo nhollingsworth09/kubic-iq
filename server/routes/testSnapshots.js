@@ -1,11 +1,21 @@
 const express = require('express');
-const { TestHistory, User } = require('../models');
-const { authMiddleware } = require('../auth');
+const { TestHistory } = require('../models');
+const { User, authMiddleware } = require('../auth');
 const router = express.Router();
+
+// TrueSkill configuration — must match answer.js
+const MU0 = 7.0;        // Optimistic prior — SAT prep students skew above mid-scale
+const SIGMA0 = 1.67;
+const BETA = 1;
+const TAU = 0.033;
+const K = 2;            // masteryScore = μ - K*σ (95% CI)
+const MIN_ANSWERS = 25;
+const clampValue = (value, min, max) => Math.min(Math.max(value, min), max);
 
 /**
  * POST /api/test-snapshots
- * Create a complete test snapshot with all questions, answers and time tracking
+ * Create a complete test snapshot with all questions, answers and time tracking.
+ * Mastery score is computed server-side using TrueSkill — client-supplied values ignored.
  */
 router.post('/', authMiddleware, async (req, res) => {
   try {
@@ -15,18 +25,37 @@ router.post('/', authMiddleware, async (req, res) => {
       correctCount,
       duration,
       topics,
-      masteryScoreChange,
-      masteryScoreBefore,
-      masteryScoreAfter,
       snapshot
     } = req.body;
-    
+
     const userId = req.user.id;
-    
+
+    // Fetch current user state before any updates
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Snapshot the user's mastery score before this test
+    const masteryScoreBefore = user.responseCount >= MIN_ANSWERS ? user.masteryScore : null;
+
+    // μ/σ/responseCount are already current — answer.js updated them per-question during the test.
+    // Re-applying TrueSkill here would double-count every answer.
+    const newMu = user.trueskill_mu;
+    const newSigma = user.trueskill_sigma;
+    const newResponseCount = user.responseCount;
+
+    // Compute new mastery score (only surfaced once MIN_ANSWERS threshold is met)
+    const rawMastery = clampValue(newMu - K * newSigma, 0, 10);
+    const masteryScoreAfter = newResponseCount >= MIN_ANSWERS ? rawMastery : null;
+    const masteryScoreChange = masteryScoreBefore !== null && masteryScoreAfter !== null
+      ? masteryScoreAfter - masteryScoreBefore
+      : null;
+
     // Calculate percentage
     const percentage = (correctCount / questionCount) * 100;
-    
-    // Create test history with complete snapshot
+
+    // Persist the test history record with server-computed mastery values
     const testHistory = await TestHistory.create({
       userId,
       testType,
@@ -39,22 +68,23 @@ router.post('/', authMiddleware, async (req, res) => {
       masteryScoreBefore,
       masteryScoreAfter,
       snapshot,
-      schemaVersion: 1 // Initial schema version
+      schemaVersion: 1
     });
-    
-    // Update user's mastery score if provided
-    if (masteryScoreBefore !== null && masteryScoreAfter !== null) {
-      await User.update(
-        { masteryScore: masteryScoreAfter },
-        { where: { id: userId } }
-      );
+
+    // Only masteryScore needs persisting — trueskill_mu, trueskill_sigma, and responseCount
+    // are already up-to-date from per-answer updates in answer.js.
+    if (masteryScoreAfter !== null) {
+      await user.update({ masteryScore: masteryScoreAfter });
     }
-    
-    console.log(`Created test snapshot with ID: ${testHistory.id}`);
-    
+
+    console.log(`Created test snapshot with ID: ${testHistory.id}, masteryScoreAfter: ${masteryScoreAfter}`);
+
     res.json({
       success: true,
-      testId: testHistory.id
+      testId: testHistory.id,
+      masteryScoreBefore,
+      masteryScoreAfter,
+      masteryScoreChange
     });
   } catch (error) {
     console.error('Error saving test snapshot:', error);

@@ -9,10 +9,10 @@ const QuestionReview: React.FC = () => {
   const { questionNumber } = useParams();
   const navigate = useNavigate();
   const { questions, answers } = useTest();
-  
+
   const questionIndex = questionNumber ? parseInt(questionNumber) - 1 : 0;
   const question = questions[questionIndex];
-  
+
   if (!question) {
     navigate('/test/results');
     return null;
@@ -20,6 +20,14 @@ const QuestionReview: React.FC = () => {
 
   const currentAnswer = answers.find(a => a.questionId === question.id);
   const options = question.questionType === 'multiple-choice' ? question.options || [] : [];
+
+  // Derive a human-readable difficulty label from the fixed question mu value
+  const getDifficultyLabel = (mu: number): { label: string; level: 'easy' | 'medium' | 'hard' } => {
+    if (mu < 4.0) return { label: 'Easy', level: 'easy' };
+    if (mu < 7.0) return { label: 'Medium', level: 'medium' };
+    return { label: 'Hard', level: 'hard' };
+  };
+  const difficulty = getDifficultyLabel(question.mu);
   
   const handleBackToResults = () => {
     navigate('/test/results');
@@ -29,9 +37,18 @@ const QuestionReview: React.FC = () => {
     <div className={reviewStyles.reviewContainer}>
       <header className={reviewStyles.reviewHeader}>
         <h2>Question {questionIndex + 1} Review</h2>
-        <div className={reviewStyles.resultBadge} 
-             data-correct={currentAnswer?.isCorrect ? 'true' : 'false'}>
-          {currentAnswer?.isCorrect ? 'Correct' : 'Incorrect'}
+        <div className={reviewStyles.headerBadges}>
+          <div
+            className={reviewStyles.difficultyBadge}
+            data-difficulty={difficulty.level}
+            title={`Difficulty rating: ${question.mu.toFixed(1)} / 10`}
+          >
+            {difficulty.label}
+          </div>
+          <div className={reviewStyles.resultBadge}
+               data-correct={currentAnswer?.isCorrect ? 'true' : 'false'}>
+            {currentAnswer?.isCorrect ? 'Correct' : 'Incorrect'}
+          </div>
         </div>
       </header>
       
