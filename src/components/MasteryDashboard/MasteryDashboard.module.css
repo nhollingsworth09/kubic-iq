@@ -536,6 +536,37 @@
   display: none;
 }
 
+/* Mastery Unlocked Celebration Modal */
+.masteryUnlockedModal {
+  background: var(--color-primary-navy);
+  color: var(--color-white);
+  width: 90%;
+  max-width: 480px;
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  text-align: center;
+}
+
+.masteryUnlockedIcon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+}
+
+.masteryUnlockedModal h2 {
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-white);
+  margin-bottom: 1.25rem;
+}
+
+.masteryUnlockedModal p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 1rem;
+}
+
 /* Question Modal Styling */
 .questionModalOverlay {
   position: fixed;

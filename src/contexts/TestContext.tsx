@@ -431,6 +431,11 @@ export const TestProvider: React.FC<TestProviderProps> = ({ children }) => {
         setMasteryScoreBefore(serverMasteryBefore);
         setMasteryScoreAfter(serverMasteryAfter);
         setMasteryScoreChange(serverMasteryChange);
+
+        // Persist a flag so the dashboard can show the unlock modal when it next mounts
+        if (serverMasteryBefore === null && serverMasteryAfter !== null) {
+          sessionStorage.setItem('mastery-just-unlocked', 'true');
+        }
         
         if (savedTestId) {
           // Store the test ID in the context state

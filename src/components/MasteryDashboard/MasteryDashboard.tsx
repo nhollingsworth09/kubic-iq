@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './MasteryDashboard.module.css';
 import TestHistoryList from './TestHistory/TestHistoryList';
 
@@ -34,6 +35,7 @@ interface UserProgress {
 
 export const MasteryDashboard = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'practice' | 'learn'>('practice');
@@ -45,6 +47,7 @@ export const MasteryDashboard = () => {
   const [checkedSubtopics, setCheckedSubtopics] = useState<string[]>([]);
   const [numQuestions, setNumQuestions] = useState<number>(10);
   const [showStartingMessage, setShowStartingMessage] = useState<boolean>(false);
+  const [showUnlockedModal, setShowUnlockedModal] = useState<boolean>(false);
     // Create a ref to track if we need to refresh data
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -69,6 +72,11 @@ export const MasteryDashboard = () => {
         if (response.ok) {
           const data = await response.json();
           setUserProgress(data);
+          // Show the unlock modal the first time the dashboard loads after the threshold is crossed
+          if (data.masteryScore !== null && sessionStorage.getItem('mastery-just-unlocked') === 'true') {
+            sessionStorage.removeItem('mastery-just-unlocked');
+            setShowUnlockedModal(true);
+          }
         } else {
           console.error('Failed to fetch user progress');
         }
@@ -90,7 +98,7 @@ export const MasteryDashboard = () => {
     };
   }, [refreshTrigger]);
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    logout();
     navigate('/login');
   };
 
@@ -510,7 +518,34 @@ export const MasteryDashboard = () => {
             )}
           </div>
         </div>
-      )}      {/* Toast Notification for Starting Practice */}
+      )}      {/* Mastery Unlocked Celebration Modal */}
+      {showUnlockedModal && (
+        <div className={styles.questionModalOverlay} onClick={() => setShowUnlockedModal(false)}>
+          <div className={styles.masteryUnlockedModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.masteryUnlockedIcon}>🏆</div>
+            <h2>Mastery Score Unlocked!</h2>
+            <p>
+              Congratulations — you've answered your first 25 questions and your Mastery Score is now active.
+            </p>
+            <p>
+              Keep in mind that your initial score is an estimate. As you continue to practice and answer
+              more questions, your score will update and increasingly reflect your true skill level.
+            </p>
+            <p>
+              You're on the right path. Stay consistent with your practice and you'll be well-prepared
+              for a successful SAT sitting. Keep going!
+            </p>
+            <button
+              className={styles.btnPrimary}
+              onClick={() => setShowUnlockedModal(false)}
+            >
+              Let's Keep Going!
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification for Starting Practice */}
       {showStartingMessage && (
         <div className={`${styles.toast} ${styles.toastInfo}`}>
           <div className={styles.toastContent}>
