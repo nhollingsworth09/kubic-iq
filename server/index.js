@@ -62,7 +62,9 @@ async function startServer() {
       console.log(`Found ${questionCount} existing questions in database.`);
       // Ensure default dev accounts exist (idempotent)
       const createTestUser = require('./scripts/createTestUser');
+      const createAdminUser = require('./scripts/createAdmin');
       await createTestUser();
+      await createAdminUser();
     }
 
     // Print dev account credentials for easy reference

@@ -307,6 +307,7 @@
 .scoreDisplay {
   font-size: 1.5rem;
   font-weight: var(--font-weight-bold);
+  color: var(--color-white);
 }
 
 /* Progress bar */
@@ -504,7 +505,7 @@
   gap: 0.75rem;
 }
 
-.masteryBadge span {
+.masteryBadge > span {
   font-family: 'Montserrat', sans-serif;
   font-size: 0.9rem;
   color: var(--color-muted);
